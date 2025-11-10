@@ -1,11 +1,26 @@
 #include <iostream>
+#include "headers/List.h"
+
+using namespace std;
 
 int main() {
-    auto lang = "C++";
-    std::cout << "Hello and welcome to " << lang << "!\n";
+    auto list = List<int>();
 
-    for (int i = 1; i <= 5; i++) {
-        std::cout << "i = " << i << std::endl;
+    list.push(1);
+    list.push(2);
+    list.push(3);
+    list.push(4);
+    list.push(5);
+
+    cout << "From head: " << endl;
+
+    for (auto it = list.getIterator(); it != it.end(); ++it) {
+        cout << it.getCurrent()->getValue() << endl;
+    }
+
+    cout << "From tail: " << endl;
+    for (auto it = list.getReverseIterator(); it != it.end(); --it) {
+        cout << it.getCurrent()->getValue() << endl;
     }
 
     return 0;

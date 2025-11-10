@@ -107,31 +107,6 @@ public:
         return copyValue;
     }
 
-    int findIndex(std::function<bool(const T&)> predicate) {
-        int currIndex = 0;
-        BidirectionalIterator<T> it(head);
-
-        while (it != it.end()) {
-            if (predicate(it.getCurrent()->getValue())) {
-                return currIndex;
-            }
-
-            ++currIndex;
-            ++it;
-        }
-
-        return -1;
-    }
-
-    void forEach(std::function<void(const T&)> func) const {
-        BidirectionalIterator<T> it(head);
-
-        while (it != it.end()) {
-            func(it.getCurrent()->getValue());
-            ++it;
-        }
-    }
-
     void insertAt(const int index, const T& value) {
         if (index < 0 || index >= count) {
             throw std::out_of_range("Index out of range.");
@@ -239,9 +214,13 @@ public:
     }
 
 
-    T& operator[](int index) {
+    T& operator[](const int index) {
+        if (index >= count) {
+            throw std::out_of_range("Index out of range.");
+        }
+
         int currIndex = 0;
-        Iterator it(first);
+        BidirectionalIterator<T> it(head);
 
         while (it != it.end()) {
             if (currIndex == index) {
@@ -250,6 +229,8 @@ public:
             ++currIndex;
             ++it;
         }
+
+        throw std::out_of_range("Index out of range.");
     }
 
     T& getFirst() {
@@ -263,5 +244,13 @@ public:
     [[nodiscard]]
     int length() const {
         return count;
+    }
+
+    BidirectionalIterator<T> getIterator() {
+        return BidirectionalIterator<T>(head);
+    }
+
+    BidirectionalIterator<T> getReverseIterator() {
+        return BidirectionalIterator<T>(tail);
     }
 };

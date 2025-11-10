@@ -15,7 +15,7 @@ public:
     DoublyLinkedNode(): next(&NIL), previous(&NIL) {}
     explicit DoublyLinkedNode(T value): value(value), next(&NIL), previous(&NIL) {}
 
-    T& getValue() const {
+    T& getValue() {
         return value;
     }
     void setValue(T fValue) {
