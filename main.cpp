@@ -13,7 +13,6 @@ int main() {
     list.push(5);
 
     cout << "From head: " << endl;
-
     for (auto it = list.getIterator(); it != it.end(); ++it) {
         cout << it.getCurrent()->getValue() << endl;
     }
