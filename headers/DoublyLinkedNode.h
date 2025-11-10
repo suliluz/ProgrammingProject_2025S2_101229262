@@ -73,6 +73,18 @@ public:
         delete this;
     }
 
+    T& operator[](int index) {
+        int currIndex = 0;
+        Iterator it(first);
+
+        while (it != it.end()) {
+            if (currIndex == index) {
+                return it.getCurrent()->getValue();
+            }
+            ++currIndex;
+            ++it;
+        }
+    }
 };
 
 template <class T>
