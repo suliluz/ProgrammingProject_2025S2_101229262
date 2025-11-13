@@ -31,5 +31,6 @@ add_executable(${PROJECT_NAME} main.cpp
         headers/HashEntry.h
         headers/Hasher.h
         headers/HashTable.h
+        headers/NTree.h
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SFML_LIBS})
