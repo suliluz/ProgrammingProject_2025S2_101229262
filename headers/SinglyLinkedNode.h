@@ -14,7 +14,7 @@ public:
     SinglyLinkedNode(): value(T()), next(NIL) {}
     explicit SinglyLinkedNode(T value): value(value), next(NIL) {};
 
-    T& getValue() const {
+    T& getValue() {
         return value;
     }
     void setValue(T fValue) {

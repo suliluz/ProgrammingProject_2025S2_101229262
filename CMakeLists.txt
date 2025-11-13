@@ -26,5 +26,10 @@ add_executable(${PROJECT_NAME} main.cpp
         headers/List.h
         headers/BidirectionalIterator.h
         headers/ForwardIterator.h
+        headers/Stack.h
+        headers/Queue.h
+        headers/HashEntry.h
+        headers/Hasher.h
+        headers/HashTable.h
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SFML_LIBS})

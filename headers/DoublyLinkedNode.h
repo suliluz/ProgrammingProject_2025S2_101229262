@@ -18,6 +18,7 @@ public:
     T& getValue() {
         return value;
     }
+
     void setValue(T fValue) {
         this->value = fValue;
     }
@@ -69,8 +70,6 @@ public:
 
         this->next = &NIL;
         this->previous = &NIL;
-
-        delete this;
     }
 };
 

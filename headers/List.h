@@ -18,7 +18,7 @@ public:
         while (it != it.end()) {
             Node* toDelete = it.getCurrent();
             ++it;
-            toDelete->remove();
+            delete toDelete;
         }
     }
 
@@ -30,7 +30,7 @@ public:
     }
 
     // Push, aka append to tail
-    void push(const T& value) {
+    void push(const T value) {
         // Create a node
         Node* node = new Node(value);
 
@@ -48,7 +48,7 @@ public:
     }
 
     // Push front, append as head
-    void pushFront(const T& value) {
+    void pushFront(const T value) {
         Node* node = new Node(value);
 
         if (!isEmpty()) {
@@ -63,13 +63,13 @@ public:
         ++count;
     }
 
-    T& shift() {
+    T shift() {
         if (isEmpty()) {
             throw std::out_of_range("List is empty.");
         }
 
         Node* toDelete = head;
-        T& copyValue = toDelete->getValue();
+        T copyValue = toDelete->getValue();
         head = head->getNext();
 
         if (head != &Node::NIL) {
@@ -79,19 +79,19 @@ public:
             tail = &Node::NIL;
         }
 
-        toDelete->remove();
+        delete toDelete;
         --count;
 
         return copyValue;
     }
 
-    T& pop() {
+    T pop() {
         if (isEmpty()) {
             throw std::out_of_range("List is empty.");
         }
 
         Node* toDelete = tail;
-        T& copyValue = toDelete->getValue();
+        T copyValue = toDelete->getValue();
         tail = tail->getPrevious();
 
         if (tail == &Node::NIL) {
@@ -101,13 +101,13 @@ public:
             tail->setNext(&Node::NIL);
         }
 
-        toDelete->remove();
+        delete toDelete;
         --count;
 
         return copyValue;
     }
 
-    void insertAt(const int index, const T& value) {
+    void insertAt(const int index, const T value) {
         if (index < 0 || index >= count) {
             throw std::out_of_range("Index out of range.");
         }
@@ -183,9 +183,9 @@ public:
                     }
                 }
 
-                toDelete->remove();
+                delete toDelete;
                 --count;
-                return;
+                break;
             }
 
             ++currIndex;
