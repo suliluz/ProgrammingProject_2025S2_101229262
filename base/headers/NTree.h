@@ -57,6 +57,14 @@ public:
         return key;
     }
 
+    // Non-const overload to allow modification of the key
+    T& getKey() {
+        if (isEmpty()) {
+            throw std::logic_error("Cannot get key from NIL node");
+        }
+        return key;
+    }
+
     // Non-const overload to get a child node at an index
     NTree<T, N>& operator[](int index) {
         if (index < 0 || index >= N) {

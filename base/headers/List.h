@@ -3,8 +3,6 @@
 #include "DoublyLinkedNode.h"
 #include "BidirectionalIterator.h"
 
-using namespace std;
-
 template <class T>
 class List {
     typedef DoublyLinkedNode<T> Node;
@@ -23,6 +21,32 @@ public:
     }
 
     List(): head(&Node::NIL), tail(&Node::NIL), count(0) {}
+
+    // Copy constructor - deep copy all nodes
+    List(const List& other): head(&Node::NIL), tail(&Node::NIL), count(0) {
+        Node* current = other.head;
+        while (current != &Node::NIL) {
+            push(current->getValue());
+            current = current->getNext();
+        }
+    }
+
+    // Copy assignment operator - deep copy all nodes
+    List& operator=(const List& other) {
+        if (this != &other) {
+            // Clear existing nodes
+            while (!isEmpty()) {
+                pop();
+            }
+            // Copy from other
+            Node* current = other.head;
+            while (current != &Node::NIL) {
+                push(current->getValue());
+                current = current->getNext();
+            }
+        }
+        return *this;
+    }
 
     [[nodiscard]]
     bool isEmpty() const {
@@ -180,6 +204,17 @@ public:
                     }
                     else {
                         head = &Node::NIL;
+                    }
+                }
+                else {
+                    // Node is in the middle - unlink it properly
+                    Node* prevNode = toDelete->getPrevious();
+                    Node* nextNode = toDelete->getNext();
+                    if (prevNode != &Node::NIL) {
+                        prevNode->setNext(nextNode);
+                    }
+                    if (nextNode != &Node::NIL) {
+                        nextNode->setPrevious(prevNode);
                     }
                 }
 

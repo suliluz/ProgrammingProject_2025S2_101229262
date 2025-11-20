@@ -17,20 +17,33 @@ FetchContent_MakeAvailable(SFML)
 
 set(SFML_LIBS
         SFML::Graphics
-        SFML::Audio
+        SFML::Window
+        SFML::System
 )
 
-add_executable(${PROJECT_NAME} main.cpp
-        headers/SinglyLinkedNode.h
-        headers/DoublyLinkedNode.h
-        headers/List.h
-        headers/BidirectionalIterator.h
-        headers/ForwardIterator.h
-        headers/Stack.h
-        headers/Queue.h
-        headers/HashEntry.h
-        headers/Hasher.h
-        headers/HashTable.h
-        headers/NTree.h
+include_directories(
+    ${CMAKE_SOURCE_DIR}/base/headers
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/game
+    ${CMAKE_SOURCE_DIR}/src/dialogue
+    ${CMAKE_SOURCE_DIR}/src/engine
 )
+
+# Source files
+set(GAME_SOURCES
+    main.cpp
+    src/engine/GameEngine.cpp
+    src/engine/DialogueVisitor.cpp
+    src/dialogue/Dialogue.cpp
+    src/dialogue/Choice.cpp
+)
+
+add_executable(${PROJECT_NAME} ${GAME_SOURCES})
+
+# Test executable for Stack and Queue
+add_executable(test_stack_queue test_stack_queue.cpp)
+
+# Copy assets directory to the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
+
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SFML_LIBS})

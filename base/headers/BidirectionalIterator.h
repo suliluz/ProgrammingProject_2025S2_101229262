@@ -2,8 +2,6 @@
 #include <iostream>
 #include "DoublyLinkedNode.h"
 
-using namespace std;
-
 template <class T>
 class BidirectionalIterator {
     typedef DoublyLinkedNode<T> Node;
@@ -55,7 +53,7 @@ public:
         return current != other.current;
     }
 
-    friend ostream& operator<<(ostream& os, const BidirectionalIterator& it) {
+    friend std::ostream& operator<<(std::ostream& os, const BidirectionalIterator& it) {
         os << it.current->getValue();
         return os;
     }

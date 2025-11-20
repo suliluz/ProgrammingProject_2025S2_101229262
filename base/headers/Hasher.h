@@ -35,3 +35,16 @@ struct Hasher<int> {
         return static_cast<size_t>(key);
     }
 };
+
+// Template specialization for std::string
+#include <string>
+template <>
+struct Hasher<std::string> {
+    static size_t hash(const std::string& str) {
+        unsigned long hash = 5381;
+        for (char c : str) {
+            hash = ((hash << 5) + hash) + c; // hash * 33 + c
+        }
+        return static_cast<size_t>(hash);
+    }
+};

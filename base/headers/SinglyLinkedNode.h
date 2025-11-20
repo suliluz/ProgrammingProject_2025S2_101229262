@@ -11,8 +11,8 @@ public:
     static Node NIL;
 
     ~SinglyLinkedNode() = default;
-    SinglyLinkedNode(): value(T()), next(NIL) {}
-    explicit SinglyLinkedNode(T value): value(value), next(NIL) {};
+    SinglyLinkedNode(): value(T()), next(&NIL) {}
+    explicit SinglyLinkedNode(T value): value(value), next(&NIL) {};
 
     T& getValue() {
         return value;
