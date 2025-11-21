@@ -17,7 +17,7 @@ struct Hasher<const char*> {
     static size_t hash(const char* str) {
         unsigned long hash = 5381;
         int c;
-        while (c = *str++) {
+        while ((c = *str++)) {
             hash = ((hash << 5) + hash) + c; // hash * 33 + c
         }
         return static_cast<size_t>(hash);

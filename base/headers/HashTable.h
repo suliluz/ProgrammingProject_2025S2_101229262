@@ -40,7 +40,7 @@ public:
     }
 
     // Insert a key-value pair
-    void insert(const K& key, const V& value) {
+    V* insert(const K& key, const V& value) {
         size_t index = getIndex(key);
         Bucket& bucket = table[index];
 
@@ -52,14 +52,14 @@ public:
             if (it.getCurrent()->getValue().key == key) {
                 // Key exists, update value
                 it.getCurrent()->getValue().value = value;
-                return;
+                return &(it.getCurrent()->getValue().value);
             }
             ++it;
         }
 
         // Key not found, insert new entry
-        bucket.push(Entry(key, value));
         currentSize++;
+        return &(bucket.push(Entry(key, value))->getValue().value);
     }
 
     // Get a value by key
@@ -126,5 +126,12 @@ public:
     [[nodiscard]]
     bool isEmpty() const {
         return currentSize == 0;
+    }
+
+    void clear() {
+        for (size_t i = 0; i < capacity; ++i) {
+            table[i].clear();
+        }
+        currentSize = 0;
     }
 };

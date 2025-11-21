@@ -109,7 +109,7 @@ public:
 
     // Trading
     bool buyItem(const Item& item, int price) {
-        if (stats.spendGold(price)) {
+        if (inventory.spendGold(price)) {
             return inventory.addItem(item);
         }
         return false;
@@ -117,7 +117,7 @@ public:
 
     bool sellItem(const std::string& itemName, int price) {
         if (inventory.removeItem(itemName)) {
-            stats.addGold(price);
+            inventory.addGold(price);
             return true;
         }
         return false;

@@ -7,6 +7,7 @@
 
 class Dialogue : public Element {
 public:
+    std::string speaker;    // Name of the person speaking
     std::string message;
     List<Choice> choices;
 

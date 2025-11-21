@@ -8,10 +8,30 @@ private:
     List<Item> items;
     int maxWeight;
     int currentWeight;
+    int gold;
 
 public:
     Inventory(int maxCapacity = 100)
-        : maxWeight(maxCapacity), currentWeight(0) {}
+        : maxWeight(maxCapacity), currentWeight(0), gold(0) {}
+
+    // Gold management
+    int getGold() const { return gold; }
+    void setGold(int amount) { gold = amount; }
+
+    void addGold(int amount) {
+        gold += amount;
+        std::cout << "Gained " << amount << " gold! (Total: " << gold << ")" << std::endl;
+    }
+
+    bool spendGold(int amount) {
+        if (gold >= amount) {
+            gold -= amount;
+            std::cout << "Spent " << amount << " gold. (Remaining: " << gold << ")" << std::endl;
+            return true;
+        }
+        std::cout << "Not enough gold! Need " << amount << " but only have " << gold << std::endl;
+        return false;
+    }
 
     bool addItem(const Item& item) {
         if (currentWeight + item.weight > maxWeight) {
@@ -75,6 +95,7 @@ public:
 
     void displayInventory() const {
         std::cout << "\n=== INVENTORY ===" << std::endl;
+        std::cout << "Gold: " << gold << std::endl;
         std::cout << "Weight: " << currentWeight << "/" << maxWeight << std::endl;
 
         if (items.isEmpty()) {

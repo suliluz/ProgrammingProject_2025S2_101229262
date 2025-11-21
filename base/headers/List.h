@@ -35,9 +35,7 @@ public:
     List& operator=(const List& other) {
         if (this != &other) {
             // Clear existing nodes
-            while (!isEmpty()) {
-                pop();
-            }
+            clear();
             // Copy from other
             Node* current = other.head;
             while (current != &Node::NIL) {
@@ -48,13 +46,22 @@ public:
         return *this;
     }
 
+    void clear() {
+        while (!isEmpty()) {
+            pop();
+        }
+        head = &Node::NIL;
+        tail = &Node::NIL;
+        count = 0;
+    }
+
     [[nodiscard]]
     bool isEmpty() const {
         return head == &Node::NIL;
     }
 
     // Push, aka append to tail
-    void push(const T value) {
+    Node* push(const T value) {
         // Create a node
         Node* node = new Node(value);
 
@@ -69,6 +76,7 @@ public:
         }
 
         ++count;
+        return node;
     }
 
     // Push front, append as head

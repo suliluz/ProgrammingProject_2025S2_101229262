@@ -27,6 +27,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/game
     ${CMAKE_SOURCE_DIR}/src/dialogue
     ${CMAKE_SOURCE_DIR}/src/engine
+    ${CMAKE_SOURCE_DIR}/src/engine/states
 )
 
 # Source files
@@ -35,7 +36,13 @@ set(GAME_SOURCES
     src/engine/GameEngine.cpp
     src/engine/DialogueVisitor.cpp
     src/dialogue/Dialogue.cpp
+    src/dialogue/DialogueGraph.cpp
     src/dialogue/Choice.cpp
+    src/engine/states/MainMenuState.cpp
+    src/engine/states/InGameState.cpp
+    src/engine/states/LoadGameState.cpp
+    src/engine/states/SettingsState.cpp
+    src/game/SaveSystem.cpp
 )
 
 add_executable(${PROJECT_NAME} ${GAME_SOURCES})

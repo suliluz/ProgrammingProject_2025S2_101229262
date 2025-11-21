@@ -1,0 +1,86 @@
+# The Shattered Kingdom - Path of Industry
+
+ROOT: INDUSTRY_START
+
+# --- The Hatter's Factory ---
+NODE: INDUSTRY_START
+MSG: You step into a cavernous factory. The air hums with the frantic energy of a thousand ticking clocks. Steam pipes hiss and pistons pound. A bizarre assembly line carries a stream of nonsensical items: teacups with holes, shoes for chickens, square wheels. In the center of it all, a man in a dusty top hat barks orders at a group of dormice operating the machinery. This is the Mad Hatter, but he's no longer just mad; he's a foreman of madness.
+CHOICE: "Approach the Mad Hatter." | target:INDUSTRY_APPROACH_HATTER
+CHOICE: "Examine the machinery." | target:INDUSTRY_EXAMINE_MACHINE
+CHOICE: "Talk to one of the dormice." | target:INDUSTRY_TALK_DORMOUSE
+
+# --- Examine the Machinery ---
+NODE: INDUSTRY_EXAMINE_MACHINE
+MSG: You look closely at the central machine. It's a monstrous contraption of gears, levers, and spinning wheels. At its heart, you see a glowing, pulsating spindle. It seems to be the power source for the entire factory. A small, gnome-like creature is tinkering with a nearby control panel, muttering to himself.
+CHOICE: "That spindle must be the Cursed Spindle." | target:INDUSTRY_APPROACH_HATTER
+CHOICE: "Approach the gnome-like creature." | target:INDUSTRY_APPROACH_GNOME
+
+# --- Talk to the Dormouse ---
+NODE: INDUSTRY_TALK_DORMOUSE
+MSG: You cautiously approach a dormouse frantically pulling a lever. "No time to talk!" it squeaks. "Productivity is madness, and madness is productivity! Must keep the Un-Birthday Present-inator running!"
+CHOICE: "Un-Birthday Present-inator?" | target:INDUSTRY_DORMOUSE_EXPLAIN
+CHOICE: "You all seem very... busy." | target:INDUSTRY_DORMOUSE_EXPLAIN
+
+NODE: INDUSTRY_DORMOUSE_EXPLAIN
+MSG: "Of course we're busy!" the dormouse chirps. "The Foreman says if we produce enough nonsense, we'll eventually produce something that makes sense! It's the 'Infinite Madness Theorem'!" It then goes back to pulling the lever, ignoring you.
+CHOICE: "This place is even madder than I thought." | target:INDUSTRY_APPROACH_HATTER
+
+# --- Approach the Mad Hatter ---
+NODE: INDUSTRY_APPROACH_HATTER
+MSG: You walk up to the Mad Hatter. He doesn't look at you, his eyes fixed on the assembly line. "Time is money, and money is time, and we have neither to spare!" he shouts. "State your purpose, or get on the production line! We're short on hat-rack testers!"
+CHOICE: "I've come for the Cursed Spindle." | target:INDUSTRY_HATTER_DEMAND
+CHOICE: "What are you making here?" | target:INDUSTRY_HATTER_EXPLAIN
+CHOICE: "I'm looking for a man named Rumpelstiltskin." | target:INDUSTRY_APPROACH_GNOME
+
+NODE: INDUSTRY_HATTER_DEMAND
+MSG: The Hatter finally turns to you, his eyes wide and manic. "The Spindle? The heart of my enterprise? The very engine of our glorious nonsense? Preposterous! It's not for sale! It's not for trade! It is the means to the end, the beginning of the middle, and the cream in the tea!"
+CHOICE: "There must be something I can offer you." | target:INDUSTRY_HATTER_BARGAIN
+CHOICE: "Then I'll just have to take it." | target:INDUSTRY_HATTER_FIGHT
+
+NODE: INDUSTRY_HATTER_EXPLAIN
+MSG: "We are in the business of ultimate diversification!" the Hatter proclaims proudly. "If we create every possible thing that *doesn't* make sense, then by exclusion, the only thing left will be the one thing that *does*! It's flawless logic!"
+CHOICE: "That's... not how logic works." | target:INDUSTRY_HATTER_DEMAND
+CHOICE: "So, you need a new power source?" | target:INDUSTRY_HATTER_BARGAIN
+
+NODE: INDUSTRY_HATTER_BARGAIN
+MSG: The Hatter pauses, tapping his chin. "A new power source... It would have to be something truly valuable. Something that can create value from nothing! Something like... straw into gold! Yes! Find me a way to spin straw into gold, and I'll give you the Spindle!"
+CHOICE: "Spin straw into gold? That's impossible." | target:INDUSTRY_HATTER_DEMAND
+CHOICE: "I'll see what I can do." | target:INDUSTRY_APPROACH_GNOME
+
+# --- The Gnome (Rumpelstiltskin) ---
+NODE: INDUSTRY_APPROACH_GNOME
+MSG: You approach the small creature tinkering with the panel. He glances at you, his eyes shrewd. "Another lost soul. You want something from the big-hatted buffoon, don't you? The spindle, perhaps? I can help you. But everything has a price."
+CHOICE: "Who are you?" | target:INDUSTRY_GNOME_WHO
+CHOICE: "What's the price?" | target:INDUSTRY_GNOME_PRICE
+
+NODE: INDUSTRY_GNOME_WHO
+MSG: "A name is a powerful thing," the gnome says with a sly grin. "And mine is a secret. But for the right price, I can spin anything. Even straw into gold."
+CHOICE: "So you're Rumpelstiltskin." | target:INDUSTRY_GNOME_NAMED
+CHOICE: "What's the price?" | target:INDUSTRY_GNOME_PRICE
+
+NODE: INDUSTRY_GNOME_NAMED
+MSG: The gnome's grin falters for a second. "Clever..." he mutters. "Very clever. But it doesn't change the price."
+CHOICE: "What's the price?" | target:INDUSTRY_GNOME_PRICE
+
+NODE: INDUSTRY_GNOME_PRICE
+MSG: "The Hatter wants gold from straw. A classic. I can do it. In return, you must give me... your first-born memory. The very first thing you can ever remember. A small price to pay for such a miracle, no?"
+CHOICE: "My first memory? But I don't have any memories." | target:INDUSTRY_GNOME_NO_MEMORY
+CHOICE: "That's too high a price." | target:INDUSTRY_HATTER_FIGHT
+
+NODE: INDUSTRY_GNOME_NO_MEMORY
+MSG: The gnome's eyes widen. "No memories? A blank slate? Oh, that's even better! So much potential! Very well, I'll do it for the promise of your first-born memory, whenever it may appear. Do we have a deal?"
+CHOICE: "Deal." | target:INDUSTRY_GNOME_DEAL
+CHOICE: "No deal. I'll find another way." | target:INDUSTRY_HATTER_FIGHT
+
+NODE: INDUSTRY_GNOME_DEAL
+MSG: The gnome cackles with glee. "Excellent!" He whispers a complex sequence of lever pulls and button presses to you. "Go to the control panel. Do this, and the machine will spin a single piece of straw into a gold thread. That should be enough to impress the Foreman."
+CHOICE: "Go to the control panel and follow the instructions." | target:INDUSTRY_SPIN_GOLD
+
+NODE: INDUSTRY_SPIN_GOLD
+MSG: You follow the gnome's instructions. The factory groans, shudders, and with a final wheeze, spits out a single, shimmering thread of pure gold. The Hatter is ecstatic. "Glorious! Magnificent! Take the spindle, you've earned it!" He carefully removes the Cursed Spindle and hands it to you.
+CHOICE: "Leave the factory with your prize." | item:Cursed Spindle:QUEST_ITEM:0 | target:CROSSROADS_MAIN
+
+# --- Combat Placeholder ---
+NODE: INDUSTRY_HATTER_FIGHT
+MSG: You decide to fight the Mad Hatter. He and his dormice army are a formidable foe. (To be implemented)
+CHOICE: "Return to the crossroads for now." | target:CROSSROADS_MAIN

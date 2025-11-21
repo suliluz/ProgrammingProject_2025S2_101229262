@@ -1,10 +1,24 @@
 #include "GameEngine.h"
 #include <iostream>
 #include <optional>
+#include "states/GameState.h"
 
-GameEngine::GameEngine() : window(sf::VideoMode({800, 600}), "RPG Game"), dialogueVisitor(window), currentDialogueNode(nullptr), player("Hero"), dialogueGraph(nullptr) {
+GameEngine::GameEngine() : currentState(nullptr), pendingState(nullptr), player("Hero"), dialogueGraph(nullptr) {
+    // Load settings
+    settings.load();
+
+    // Create window with settings size
+    unsigned int width, height;
+    settings.getWindowDimensions(width, height);
+
+    if (settings.getWindowSize() == WindowSize::FULLSCREEN) {
+        window.create(sf::VideoMode::getDesktopMode(), "RPG Game", sf::State::Fullscreen);
+    } else {
+        window.create(sf::VideoMode({width, height}), "RPG Game");
+    }
+
     // Initialize player with starting stats
-    player.getStats().addGold(50);
+    player.getInventory().addGold(0);
 
     // Load dialogues
     loadDialogues();
@@ -14,25 +28,17 @@ void GameEngine::loadDialogues() {
     // Create dialogue graph
     dialogueGraph = new DialogueGraph(player);
 
-    // Set callback for dialogue navigation
-    dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node) {
-        startDialogue(node);
-    });
+    // Load dialogue files
+    if (dialogueGraph->loadFromFile("assets/dialogues/awakening.txt")) {
+        dialogueGraph->loadAdditionalFile("assets/dialogues/crossroads.txt");
+        dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_vanity.txt");
+        dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_industry.txt");
+        dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_predation.txt");
+        dialogueGraph->loadAdditionalFile("assets/dialogues/ending.txt");
+        std::cout << "Dialogues loaded successfully!" << std::endl;
 
-    // Load dialogue file
-    if (dialogueGraph->loadFromFile("assets/dialogues/quest_start.txt")) {
-        std::cout << "Dialogue loaded successfully!" << std::endl;
-
-        // Build and start dialogue tree
-        auto* rootNode = dialogueGraph->buildTree();
-        if (rootNode) {
-            player.displayStatus();
-            startDialogue(rootNode);
-        } else {
-            std::cerr << "Failed to build dialogue tree!" << std::endl;
-        }
     } else {
-        std::cerr << "Failed to load dialogue file!" << std::endl;
+        std::cerr << "Failed to load initial dialogue file!" << std::endl;
     }
 }
 
@@ -40,20 +46,21 @@ GameEngine::~GameEngine() {
     delete dialogueGraph;
 }
 
-void GameEngine::startDialogue(NTree<Dialogue, MAX_CHOICES>* dialogueNode) {
-    if (dialogueNode && !dialogueNode->isEmpty()) {
-        currentDialogueNode = dialogueNode;
-        currentDialogueNode->getKey().accept(dialogueVisitor);
-    } else {
-        // End of a conversation branch
-        currentDialogueNode = nullptr;
-    }
+void GameEngine::changeState(std::unique_ptr<GameState> state) {
+    pendingState = std::move(state);
 }
 
 void GameEngine::run() {
     sf::Clock clock;
     while (window.isOpen()) {
         sf::Time deltaTime = clock.restart();
+
+        // Apply pending state change at the start of the frame
+        if (pendingState) {
+            currentState = std::move(pendingState);
+            pendingState = nullptr;
+        }
+
         processEvents();
         update(deltaTime);
         render();
@@ -61,26 +68,21 @@ void GameEngine::run() {
 }
 
 void GameEngine::processEvents() {
-    while (const std::optional<sf::Event> event = window.pollEvent()) {
-        if (event->is<sf::Event::Closed>()) {
-            window.close();
-        }
-        if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
-            dialogueVisitor.handleInput(*event);
-        }
+    if (currentState) {
+        currentState->handleInput();
     }
 }
 
 void GameEngine::update(sf::Time deltaTime) {
-    if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
-        dialogueVisitor.update(deltaTime);
+    if (currentState) {
+        currentState->update(deltaTime.asSeconds());
     }
 }
 
 void GameEngine::render() {
     window.clear();
-    if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
-        dialogueVisitor.render();
+    if (currentState) {
+        currentState->render(window);
     }
     window.display();
 }

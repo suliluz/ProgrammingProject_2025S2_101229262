@@ -20,23 +20,18 @@ private:
     int intelligence;
     int agility;
 
-    // Currency
-    int gold;
-
 public:
     PlayerStats()
         : name("Adventurer"), level(1), experience(0),
           maxHealth(100), currentHealth(100),
           maxMana(50), currentMana(50),
-          strength(10), defense(5), intelligence(8), agility(7),
-          gold(0) {}
+          strength(10), defense(5), intelligence(8), agility(7) {}
 
     PlayerStats(const std::string& playerName)
         : name(playerName), level(1), experience(0),
           maxHealth(100), currentHealth(100),
           maxMana(50), currentMana(50),
-          strength(10), defense(5), intelligence(8), agility(7),
-          gold(0) {}
+          strength(10), defense(5), intelligence(8), agility(7) {}
 
     // Getters
     const std::string& getName() const { return name; }
@@ -50,11 +45,29 @@ public:
     int getDefense() const { return defense; }
     int getIntelligence() const { return intelligence; }
     int getAgility() const { return agility; }
-    int getGold() const { return gold; }
+
+    // Aliases for save system
+    int getHP() const { return currentHealth; }
+    int getMaxHP() const { return maxHealth; }
+    int getMP() const { return currentMana; }
+    int getMaxMP() const { return maxMana; }
+    int getSTR() const { return strength; }
+    int getDEF() const { return defense; }
+    int getINT() const { return intelligence; }
+    int getAGI() const { return agility; }
 
     // Setters
     void setName(const std::string& newName) { name = newName; }
     void setLevel(int newLevel) { level = newLevel; }
+    void setExperience(int exp) { experience = exp; }
+    void setHP(int hp) { currentHealth = hp; }
+    void setMaxHP(int hp) { maxHealth = hp; }
+    void setMP(int mp) { currentMana = mp; }
+    void setMaxMP(int mp) { maxMana = mp; }
+    void setSTR(int str) { strength = str; }
+    void setDEF(int def) { defense = def; }
+    void setINT(int intel) { intelligence = intel; }
+    void setAGI(int agi) { agility = agi; }
 
     // Health management
     void takeDamage(int damage) {
@@ -99,22 +112,6 @@ public:
     void modifyIntelligence(int amount) { intelligence += amount; }
     void modifyAgility(int amount) { agility += amount; }
 
-    // Gold management
-    void addGold(int amount) {
-        gold += amount;
-        std::cout << "Gained " << amount << " gold! (Total: " << gold << ")" << std::endl;
-    }
-
-    bool spendGold(int amount) {
-        if (gold >= amount) {
-            gold -= amount;
-            std::cout << "Spent " << amount << " gold. (Remaining: " << gold << ")" << std::endl;
-            return true;
-        }
-        std::cout << "Not enough gold! Need " << amount << " but only have " << gold << std::endl;
-        return false;
-    }
-
     // Experience and leveling
     void gainExperience(int exp) {
         experience += exp;
@@ -156,7 +153,6 @@ public:
         std::cout << "MP: " << currentMana << "/" << maxMana << std::endl;
         std::cout << "STR: " << strength << " | DEF: " << defense << std::endl;
         std::cout << "INT: " << intelligence << " | AGI: " << agility << std::endl;
-        std::cout << "Gold: " << gold << std::endl;
         std::cout << "Experience: " << experience << "/" << (level * 100) << std::endl;
     }
 };
