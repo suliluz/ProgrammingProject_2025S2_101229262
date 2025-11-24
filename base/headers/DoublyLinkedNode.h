@@ -12,7 +12,7 @@ public:
     static Node NIL;
 
     ~DoublyLinkedNode() = default;
-    DoublyLinkedNode(): next(&NIL), previous(&NIL) {}
+    DoublyLinkedNode(): value(T()), next(&NIL), previous(&NIL) {}
     explicit DoublyLinkedNode(T value): value(value), next(&NIL), previous(&NIL) {}
 
     T& getValue() {
@@ -74,4 +74,8 @@ public:
 };
 
 template <class T>
-DoublyLinkedNode<T> DoublyLinkedNode<T>::NIL;
+DoublyLinkedNode<T> DoublyLinkedNode<T>::NIL = [] {
+    DoublyLinkedNode nil_node;
+    // The default constructor for std::optional makes `value` empty (std::nullopt), which is what we want for a sentinel.
+    return nil_node;
+}();

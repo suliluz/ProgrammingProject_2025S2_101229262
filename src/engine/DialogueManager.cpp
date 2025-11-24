@@ -1,14 +1,24 @@
 #include "DialogueManager.h"
 #include <iostream>
 
-DialogueManager::DialogueManager() : text(font), characterInterval(sf::seconds(0.05f)), isDialogueActive(false), selectedChoice(0), currentDialogue(nullptr) {
+using namespace std;
+
+DialogueManager::DialogueManager():
+font(),
+characterInterval(sf::seconds(0.05f)),
+isDialogueActive(false),
+selectedChoice(0),
+currentDialogue(nullptr),
+text(nullptr) {
     if (!font.openFromFile("assets/arial.ttf")) {
         // In a real game, you'd have better error handling
-        std::cerr << "Error loading font" << std::endl;
+        cerr << "Error loading font" << endl;
     }
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::White);
-    text.setPosition({50, 450});
+    // Create text after font is loaded
+    text = new sf::Text(font);
+    text->setCharacterSize(24);
+    text->setFillColor(sf::Color::White);
+    text->setPosition({50, 450});
 }
 
 void DialogueManager::startDialogue(const Dialogue& dialogue) {
@@ -20,13 +30,13 @@ void DialogueManager::startDialogue(const Dialogue& dialogue) {
     selectedChoice = 0;
 
     choiceTexts.clear();
-    for (size_t i = 0; i < dialogue.choices.size(); ++i) {
-        sf::Text choiceText(font);
-        choiceText.setCharacterSize(20);
-        choiceText.setFillColor(sf::Color::White);
-        choiceText.setString(dialogue.choices[i].text);
-        choiceText.setPosition({70, 500 + i * 25.f});
-        choiceTexts.push_back(choiceText);
+    for (size_t i = 0; i < dialogue.choices.length(); ++i) {
+        sf::Text* choiceText = new sf::Text(font);
+        choiceText->setCharacterSize(20);
+        choiceText->setFillColor(sf::Color::White);
+        choiceText->setString(dialogue.choices[i].text);
+        choiceText->setPosition({70, 500 + i * 25.f});
+        choiceTexts.push(choiceText);
     }
 }
 
@@ -41,18 +51,18 @@ void DialogueManager::update(sf::Time deltaTime) {
         }
     }
 
-    for (size_t i = 0; i < choiceTexts.size(); ++i) {
-        choiceTexts[i].setFillColor(i == selectedChoice ? sf::Color::Yellow : sf::Color::White);
+    for (size_t i = 0; i < choiceTexts.length(); ++i) {
+        choiceTexts[i]->setFillColor(i == selectedChoice ? sf::Color::Yellow : sf::Color::White);
     }
 }
 
 void DialogueManager::render(sf::RenderWindow& window) {
     if (!isDialogueActive) return;
 
-    window.draw(text);
+    window.draw(*text);
     if (currentMessage.length() == fullMessage.length()) {
         for (const auto& choiceText : choiceTexts) {
-            window.draw(choiceText);
+            window.draw(*choiceText);
         }
     }
 }
@@ -62,9 +72,9 @@ void DialogueManager::handleInput(const sf::Event& event) {
 
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
         if (keyPressed->code == sf::Keyboard::Key::Up) {
-            selectedChoice = (selectedChoice > 0) ? selectedChoice - 1 : choiceTexts.size() - 1;
+            selectedChoice = (selectedChoice > 0) ? selectedChoice - 1 : choiceTexts.length() - 1;
         } else if (keyPressed->code == sf::Keyboard::Key::Down) {
-            selectedChoice = (selectedChoice < choiceTexts.size() - 1) ? selectedChoice + 1 : 0;
+            selectedChoice = (selectedChoice < choiceTexts.length() - 1) ? selectedChoice + 1 : 0;
         } else if (keyPressed->code == sf::Keyboard::Key::Enter) {
             selectChoice(selectedChoice);
         }
@@ -74,12 +84,12 @@ void DialogueManager::handleInput(const sf::Event& event) {
 void DialogueManager::nextCharacter() {
     if (currentMessage.length() < fullMessage.length()) {
         currentMessage += fullMessage[currentMessage.length()];
-        text.setString(currentMessage);
+        text->setString(currentMessage);
     }
 }
 
 void DialogueManager::selectChoice(int index) {
-    if (currentDialogue && index < currentDialogue->choices.size()) {
+    if (currentDialogue && index < currentDialogue->choices.length()) {
         if (currentDialogue->choices[index].action) {
             currentDialogue->choices[index].action();
         }

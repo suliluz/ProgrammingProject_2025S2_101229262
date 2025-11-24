@@ -3,6 +3,8 @@
 #include "Item.h"
 #include <iostream>
 
+using namespace std;
+
 class Inventory {
 private:
     List<Item> items;
@@ -20,31 +22,31 @@ public:
 
     void addGold(int amount) {
         gold += amount;
-        std::cout << "Gained " << amount << " gold! (Total: " << gold << ")" << std::endl;
+        cout << "Gained " << amount << " gold! (Total: " << gold << ")" << endl;
     }
 
     bool spendGold(int amount) {
         if (gold >= amount) {
             gold -= amount;
-            std::cout << "Spent " << amount << " gold. (Remaining: " << gold << ")" << std::endl;
+            cout << "Spent " << amount << " gold. (Remaining: " << gold << ")" << endl;
             return true;
         }
-        std::cout << "Not enough gold! Need " << amount << " but only have " << gold << std::endl;
+        cout << "Not enough gold! Need " << amount << " but only have " << gold << endl;
         return false;
     }
 
     bool addItem(const Item& item) {
         if (currentWeight + item.weight > maxWeight) {
-            std::cout << "Inventory full! Cannot carry " << item.name << std::endl;
+            cout << "Inventory full! Cannot carry " << item.name << endl;
             return false;
         }
         items.push(item);
         currentWeight += item.weight;
-        std::cout << "Added " << item.name << " to inventory." << std::endl;
+        cout << "Added " << item.name << " to inventory." << endl;
         return true;
     }
 
-    bool removeItem(const std::string& itemName) {
+    bool removeItem(const string& itemName) {
         auto it = items.getIterator();
         auto endIt = it.end();
         int index = 0;
@@ -54,17 +56,17 @@ public:
                 Item removedItem = items[index];
                 items.removeAt(index);
                 currentWeight -= removedItem.weight;
-                std::cout << "Removed " << itemName << " from inventory." << std::endl;
+                cout << "Removed " << itemName << " from inventory." << endl;
                 return true;
             }
             ++it;
             ++index;
         }
-        std::cout << itemName << " not found in inventory." << std::endl;
+        cout << itemName << " not found in inventory." << endl;
         return false;
     }
 
-    Item* findItem(const std::string& itemName) {
+    Item* findItem(const string& itemName) {
         auto it = items.getIterator();
         auto endIt = it.end();
 
@@ -77,7 +79,7 @@ public:
         return nullptr;
     }
 
-    bool hasItem(const std::string& itemName) const {
+    bool hasItem(const string& itemName) const {
         return const_cast<Inventory*>(this)->findItem(itemName) != nullptr;
     }
 
@@ -94,12 +96,12 @@ public:
     }
 
     void displayInventory() const {
-        std::cout << "\n=== INVENTORY ===" << std::endl;
-        std::cout << "Gold: " << gold << std::endl;
-        std::cout << "Weight: " << currentWeight << "/" << maxWeight << std::endl;
+        cout << "\n=== INVENTORY ===" << endl;
+        cout << "Gold: " << gold << endl;
+        cout << "Weight: " << currentWeight << "/" << maxWeight << endl;
 
         if (items.isEmpty()) {
-            std::cout << "Empty" << std::endl;
+            cout << "Empty" << endl;
             return;
         }
 
@@ -109,9 +111,9 @@ public:
 
         while (it != endIt) {
             const Item& item = it.getCurrent()->getValue();
-            std::cout << index << ". " << item.name
+            cout << index << ". " << item.name
                      << " (Value: " << item.value
-                     << ", Weight: " << item.weight << ")" << std::endl;
+                     << ", Weight: " << item.weight << ")" << endl;
             ++it;
             ++index;
         }

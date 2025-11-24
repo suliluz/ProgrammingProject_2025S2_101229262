@@ -1,9 +1,10 @@
-#ifndef MAINMENUSTATE_H
-#define MAINMENUSTATE_H
+#pragma once
 
 #include "GameState.h"
 #include <SFML/Graphics.hpp>
-#include <vector>
+#include "List.h"
+
+using namespace std;
 
 class MainMenuState : public GameState {
 public:
@@ -17,11 +18,9 @@ public:
 private:
     sf::Font font;
     sf::Text* title;
-    std::vector<sf::Text*> menuItems;
+    List<sf::Text*> menuItems;
     int selectedItemIndex;
 
     void moveUp();
     void moveDown();
 };
-
-#endif //MAINMENUSTATE_H

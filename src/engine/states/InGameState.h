@@ -1,5 +1,4 @@
-#ifndef INGAMESTATE_H
-#define INGAMESTATE_H
+#pragma once
 
 #include "GameState.h"
 #include "engine/DialogueVisitor.h"
@@ -41,5 +40,3 @@ private:
     bool showMenu;
     int hoveredButton; // -1 = none, 0 = save, 1 = load, 2 = exit
 };
-
-#endif //INGAMESTATE_H

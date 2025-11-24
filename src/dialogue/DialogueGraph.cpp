@@ -1,8 +1,16 @@
+#include <iostream>
 #include "dialogue/DialogueGraph.h"
+#include <fstream>
+#include <string>
+#include "SFML/Audio/Music.hpp"
+
+using namespace std;
 
 DialogueGraph::Action::Action() : type(END_DIALOGUE), stringParam(""), intParam(0) {}
+
 DialogueGraph::Action::Action(Type t, int val) : type(t), stringParam(""), intParam(val) {}
-DialogueGraph::Action::Action(Type t, const std::string& str, int val)
+
+DialogueGraph::Action::Action(Type t, const string& str, int val)
     : type(t), stringParam(str), intParam(val) {}
 
 DialogueGraph::ChoiceInfo::ChoiceInfo() : text(""), targetNodeId(""), condition("") {}
@@ -41,15 +49,15 @@ DialogueGraph::~DialogueGraph() {
     fileNodeData.clear();
 }
 
-void DialogueGraph::setDialogueStartCallback(std::function<void(NTree<Dialogue, MAX_CHOICES>*)> callback) {
+void DialogueGraph::setDialogueStartCallback(function<void(NTree<Dialogue, MAX_CHOICES>*)> callback) {
     onDialogueStart = callback;
 }
 
-bool DialogueGraph::loadFromFile(const std::string& filename) {
+bool DialogueGraph::loadFromFile(const string& filename) {
     return loadFile(filename, true);
 }
 
-bool DialogueGraph::loadAdditionalFile(const std::string& filename) {
+bool DialogueGraph::loadAdditionalFile(const string& filename) {
     return loadFile(filename, false);
 }
 
@@ -58,12 +66,12 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildTree() {
     return rootTree;
 }
 
-NTree<Dialogue, MAX_CHOICES>* DialogueGraph::getNode(const std::string& nodeId) {
+NTree<Dialogue, MAX_CHOICES>* DialogueGraph::getNode(const string& nodeId) {
     auto* result = builtNodes.search(nodeId);
     return result ? *result : nullptr;
 }
 
-bool DialogueGraph::loadFile(const std::string& filename, bool isFirstFile) {
+bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
     if (isFirstFile) {
         // Clean up existing data
         auto nodeInfoIt = allNodeInfos.getIterator();
@@ -87,20 +95,20 @@ bool DialogueGraph::loadFile(const std::string& filename, bool isFirstFile) {
         allFiles.clear();
     }
 
-    std::ifstream file(filename);
+    ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Failed to open dialogue file: " << filename << std::endl;
+        cerr << "Failed to open dialogue file: " << filename << endl;
         return false;
     }
 
     allFiles.push(filename);
-    auto* currentFileNodes = new HashTable<std::string, NodeInfo*>();
+    auto* currentFileNodes = new HashTable<string, NodeInfo*>();
     fileNodeData.insert(filename, currentFileNodes);
 
-    std::string line;
+    string line;
     NodeInfo* currentNode = nullptr;
 
-    while (std::getline(file, line)) {
+    while (getline(file, line)) {
         line = trim(line);
 
         // Skip empty lines and comments
@@ -141,7 +149,7 @@ bool DialogueGraph::loadFile(const std::string& filename, bool isFirstFile) {
     return true;
 }
 
-NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const std::string& nodeId) {
+NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
     // Check if already built
     auto* existing = builtNodes.search(nodeId);
     if (existing) {
@@ -165,7 +173,7 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const std::string& nodeId
     }
 
     if (!data) {
-        std::cerr << "Node not found: " << nodeId << std::endl;
+        cerr << "Node not found: " << nodeId << endl;
         return nullptr;
     }
 
@@ -205,12 +213,12 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const std::string& nodeId
     return node;
 }
 
-std::function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree<Dialogue, MAX_CHOICES>* targetNode) {
+function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree<Dialogue, MAX_CHOICES>* targetNode) {
     return [this, choiceInfo, targetNode]() {
         // Check condition
         if (!choiceInfo.condition.empty()) {
             if (!evaluateCondition(choiceInfo.condition)) {
-                std::cout << "Condition not met: " << choiceInfo.condition << std::endl;
+                cout << "Condition not met: " << choiceInfo.condition << endl;
                 return;
             }
         }
@@ -271,35 +279,35 @@ void DialogueGraph::executeAction(const Action& action) {
     }
 }
 
-bool DialogueGraph::evaluateCondition(const std::string& condition) {
+bool DialogueGraph::evaluateCondition(const string& condition) {
     // Simple condition parser: "gold>=30", "level>5", "hasitem:Sword"
     if (condition.rfind("gold>=", 0) == 0) {
-        int required = std::stoi(condition.substr(6));
+        int required = stoi(condition.substr(6));
         return playerRef->getInventory().getGold() >= required;
     }
     else if (condition.rfind("gold>", 0) == 0) {
-        int required = std::stoi(condition.substr(5));
+        int required = stoi(condition.substr(5));
         return playerRef->getInventory().getGold() > required;
     }
     else if (condition.rfind("level>=", 0) == 0) {
-        int required = std::stoi(condition.substr(7));
+        int required = stoi(condition.substr(7));
         return playerRef->getStats().getLevel() >= required;
     }
     else if (condition.rfind("hasitem:", 0) == 0) {
-        std::string itemName = condition.substr(8);
+        string itemName = condition.substr(8);
         return playerRef->getInventory().hasItem(itemName);
     }
 
     return true;
 }
 
-Item DialogueGraph::createItemFromString(const std::string& itemStr) {
+Item DialogueGraph::createItemFromString(const string& itemStr) {
     // Parse format: "ItemName:ItemType:bonus"
     // e.g., "Health Potion:POTION:50" or "Iron Sword:WEAPON:5"
 
-    List<std::string> parts = split(itemStr, ':');
+    List<string> parts = split(itemStr, ':');
 
-    std::string name = "Unknown";
+    string name = "Unknown";
     ItemType type = ItemType::MISC;
     int bonus = 0;
 
@@ -308,7 +316,7 @@ Item DialogueGraph::createItemFromString(const std::string& itemStr) {
     int index = 0;
 
     while (it != endIt) {
-        std::string part = trim(it.getCurrent()->getValue());
+        string part = trim(it.getCurrent()->getValue());
 
         if (index == 0) {
             name = part;
@@ -317,7 +325,7 @@ Item DialogueGraph::createItemFromString(const std::string& itemStr) {
             type = stringToItemType(part);
         }
         else if (index == 2) {
-            bonus = std::stoi(part);
+            bonus = stoi(part);
         }
 
         ++it;
@@ -340,7 +348,7 @@ Item DialogueGraph::createItemFromString(const std::string& itemStr) {
     return item;
 }
 
-ItemType DialogueGraph::stringToItemType(const std::string& typeStr) {
+ItemType DialogueGraph::stringToItemType(const string& typeStr) {
     if (typeStr == "WEAPON") return ItemType::WEAPON;
     if (typeStr == "ARMOR") return ItemType::ARMOR;
     if (typeStr == "POTION") return ItemType::POTION;
@@ -349,17 +357,17 @@ ItemType DialogueGraph::stringToItemType(const std::string& typeStr) {
     return ItemType::MISC;
 }
 
-DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const std::string& choiceLine) {
+DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
     // Format: "Choice text | target:node_id | gold:20 | item:ItemName:Type:bonus | xp:10 | condition:gold>=30"
     ChoiceInfo info;
 
-    List<std::string> parts = split(choiceLine, '|');
+    List<string> parts = split(choiceLine, '|');
     auto it = parts.getIterator();
     auto endIt = it.end();
     bool first = true;
 
     while (it != endIt) {
-        std::string part = trim(it.getCurrent()->getValue());
+        string part = trim(it.getCurrent()->getValue());
 
         if (first) {
             info.text = part;
@@ -369,19 +377,19 @@ DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const std::string& choiceLi
             info.targetNodeId = trim(part.substr(7));
         }
         else if (part.rfind("gold:", 0) == 0) {
-            int amount = std::stoi(part.substr(5));
+            int amount = stoi(part.substr(5));
             info.actions.push(Action(Action::GOLD, amount));
         }
         else if (part.rfind("item:", 0) == 0) {
-            std::string itemStr = part.substr(5);
+            string itemStr = part.substr(5);
             info.actions.push(Action(Action::ITEM, itemStr, 0));
         }
         else if (part.rfind("xp:", 0) == 0) {
-            int amount = std::stoi(part.substr(3));
+            int amount = stoi(part.substr(3));
             info.actions.push(Action(Action::XP, amount));
         }
         else if (part.rfind("health:", 0) == 0) {
-            int amount = std::stoi(part.substr(7));
+            int amount = stoi(part.substr(7));
             info.actions.push(Action(Action::HEALTH, amount));
         }
         else if (part.rfind("condition:", 0) == 0) {
@@ -394,19 +402,19 @@ DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const std::string& choiceLi
     return info;
 }
 
-std::string DialogueGraph::trim(const std::string& str) {
+string DialogueGraph::trim(const string& str) {
     size_t first = str.find_first_not_of(" \t\n\r");
-    if (first == std::string::npos) return "";
+    if (first == string::npos) return "";
     size_t last = str.find_last_not_of(" \t\n\r");
     return str.substr(first, (last - first + 1));
 }
 
-List<std::string> DialogueGraph::split(const std::string& str, char delimiter) {
-    List<std::string> result;
-    std::stringstream ss(str);
-    std::string item;
+List<string> DialogueGraph::split(const string& str, char delimiter) {
+    List<string> result;
+    stringstream ss(str);
+    string item;
 
-    while (std::getline(ss, item, delimiter)) {
+    while (getline(ss, item, delimiter)) {
         result.push(item);
     }
 

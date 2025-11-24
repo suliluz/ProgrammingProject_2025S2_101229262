@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+using namespace std;
+
 enum class ItemType {
     WEAPON,
     ARMOR,
@@ -12,8 +14,8 @@ enum class ItemType {
 
 class Item {
 public:
-    std::string name;
-    std::string description;
+    string name;
+    string description;
     ItemType type;
     int value;
     int weight;
@@ -31,7 +33,7 @@ public:
           value(0), weight(0), healthRestore(0), manaRestore(0),
           attackBonus(0), defenseBonus(0) {}
 
-    Item(const std::string& itemName, ItemType itemType, int itemValue = 0)
+    Item(const string& itemName, ItemType itemType, int itemValue = 0)
         : name(itemName), description(""), type(itemType),
           value(itemValue), weight(1), healthRestore(0), manaRestore(0),
           attackBonus(0), defenseBonus(0) {}

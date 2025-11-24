@@ -1,6 +1,4 @@
-#ifndef GAMESTATE_H
-#define GAMESTATE_H
-
+#pragma once
 #include <SFML/Graphics.hpp>
 
 class GameEngine; // Forward declaration
@@ -17,5 +15,3 @@ public:
 protected:
     GameEngine& game;
 };
-
-#endif //GAMESTATE_H

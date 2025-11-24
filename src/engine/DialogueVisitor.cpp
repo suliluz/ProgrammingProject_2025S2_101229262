@@ -4,9 +4,9 @@
 DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
     : window(win), baseCharacterInterval(sf::seconds(0.05f)), characterInterval(sf::seconds(0.05f)),
       dialogueActive(false), selectedChoice(0), currentDialogue(nullptr) {
-    std::cout << "DialogueVisitor constructor start" << std::endl;
+    cout << "DialogueVisitor constructor start" << endl;
     if (!font.openFromFile("assets/arial.ttf")) {
-        std::cerr << "Error loading font" << std::endl;
+        cerr << "Error loading font" << endl;
     }
 
     // Main dialogue text
@@ -22,7 +22,7 @@ DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
     speakerText->setStyle(sf::Text::Bold);
     speakerText->setPosition({70, 345});
 
-    std::cout << "DialogueVisitor constructor end" << std::endl;
+    cout << "DialogueVisitor constructor end" << endl;
 }
 
 DialogueVisitor::~DialogueVisitor() {
@@ -32,7 +32,7 @@ DialogueVisitor::~DialogueVisitor() {
 }
 
 void DialogueVisitor::visit(Dialogue& dialogue) {
-    std::cout << "DialogueVisitor visit start" << std::endl;
+    cout << "DialogueVisitor visit start" << endl;
     clearChoices();
     dialogueActive = true;
     currentDialogue = &dialogue;
@@ -66,7 +66,7 @@ void DialogueVisitor::visit(Dialogue& dialogue) {
         ++it;
         i++;
     }
-    std::cout << "DialogueVisitor visit end" << std::endl;
+    cout << "DialogueVisitor visit end" << endl;
 }
 
 void DialogueVisitor::visit(Choice& choice) {
@@ -148,7 +148,7 @@ void DialogueVisitor::render() {
             window.draw(continueHint);
         } else {
             // Draw choices on the right side, above the dialogue box
-            float choiceWidth = std::min(windowWidth * 0.40f, 450.0f); // 40% of window or max 450px
+            float choiceWidth = min(windowWidth * 0.40f, 450.0f); // 40% of window or max 450px
             float choiceX = windowWidth - boxMargin - choiceWidth;
 
             // Calculate spacing based on number of choices and available space
@@ -156,12 +156,12 @@ void DialogueVisitor::render() {
             float availableHeight = boxY - 100; // Space from top to dialogue box minus margin
             float choiceHeight = 30.0f;
             float maxChoiceSpacing = 40.0f;
-            float choiceSpacing = std::min(maxChoiceSpacing, (availableHeight - (numChoices * choiceHeight)) / (numChoices + 1));
+            float choiceSpacing = min(maxChoiceSpacing, (availableHeight - (numChoices * choiceHeight)) / (numChoices + 1));
 
             // Make sure spacing is at least 5px
             if (choiceSpacing < 5.0f) {
                 choiceSpacing = 5.0f;
-                choiceHeight = std::max(25.0f, (availableHeight - (choiceSpacing * (numChoices + 1))) / numChoices);
+                choiceHeight = max(25.0f, (availableHeight - (choiceSpacing * (numChoices + 1))) / numChoices);
             }
 
             float choiceStartY = boxY - 30; // Start just above the dialogue box
@@ -193,13 +193,13 @@ void DialogueVisitor::render() {
                 choiceText->setPosition({choiceX + 10, choiceY + 4});
 
                 // Check if text overflows and truncate with ellipsis if needed
-                std::string originalText = choiceText->getString();
+                string originalText = choiceText->getString();
                 float maxTextWidth = choiceWidth - 20; // Leave margins
 
                 choiceText->setString(originalText);
                 if (choiceText->getLocalBounds().size.x > maxTextWidth) {
                     // Truncate text with ellipsis
-                    std::string truncated = originalText;
+                    string truncated = originalText;
                     while (truncated.length() > 3 && choiceText->getLocalBounds().size.x > maxTextWidth) {
                         truncated = truncated.substr(0, truncated.length() - 1);
                         choiceText->setString(truncated + "...");
@@ -262,10 +262,10 @@ void DialogueVisitor::clearChoices() {
     }
 }
 
-std::string DialogueVisitor::wrapText(const std::string& text, float maxWidth) {
-    std::string result;
-    std::string currentLine;
-    std::string word;
+string DialogueVisitor::wrapText(const string& text, float maxWidth) {
+    string result;
+    string currentLine;
+    string word;
 
     sf::Text tempText(font);
     tempText.setCharacterSize(24);
@@ -280,7 +280,7 @@ std::string DialogueVisitor::wrapText(const std::string& text, float maxWidth) {
             }
 
             // Test if adding this word exceeds max width
-            std::string testLine = currentLine;
+            string testLine = currentLine;
             if (!testLine.empty()) {
                 testLine += " ";
             }

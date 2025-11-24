@@ -2,9 +2,11 @@
 #include <string>
 #include <iostream>
 
+using namespace std;
+
 class PlayerStats {
 private:
-    std::string name;
+    string name;
     int level;
     int experience;
 
@@ -27,14 +29,14 @@ public:
           maxMana(50), currentMana(50),
           strength(10), defense(5), intelligence(8), agility(7) {}
 
-    PlayerStats(const std::string& playerName)
+    PlayerStats(const string& playerName)
         : name(playerName), level(1), experience(0),
           maxHealth(100), currentHealth(100),
           maxMana(50), currentMana(50),
           strength(10), defense(5), intelligence(8), agility(7) {}
 
     // Getters
-    const std::string& getName() const { return name; }
+    const string& getName() const { return name; }
     int getLevel() const { return level; }
     int getExperience() const { return experience; }
     int getMaxHealth() const { return maxHealth; }
@@ -57,7 +59,7 @@ public:
     int getAGI() const { return agility; }
 
     // Setters
-    void setName(const std::string& newName) { name = newName; }
+    void setName(const string& newName) { name = newName; }
     void setLevel(int newLevel) { level = newLevel; }
     void setExperience(int exp) { experience = exp; }
     void setHP(int hp) { currentHealth = hp; }
@@ -77,24 +79,24 @@ public:
         currentHealth -= actualDamage;
         if (currentHealth < 0) currentHealth = 0;
 
-        std::cout << name << " took " << actualDamage << " damage! ("
-                  << currentHealth << "/" << maxHealth << " HP)" << std::endl;
+        cout << name << " took " << actualDamage << " damage! ("
+                  << currentHealth << "/" << maxHealth << " HP)" << endl;
     }
 
     void heal(int amount) {
         currentHealth += amount;
         if (currentHealth > maxHealth) currentHealth = maxHealth;
 
-        std::cout << name << " restored " << amount << " HP! ("
-                  << currentHealth << "/" << maxHealth << " HP)" << std::endl;
+        cout << name << " restored " << amount << " HP! ("
+                  << currentHealth << "/" << maxHealth << " HP)" << endl;
     }
 
     void restoreMana(int amount) {
         currentMana += amount;
         if (currentMana > maxMana) currentMana = maxMana;
 
-        std::cout << name << " restored " << amount << " MP! ("
-                  << currentMana << "/" << maxMana << " MP)" << std::endl;
+        cout << name << " restored " << amount << " MP! ("
+                  << currentMana << "/" << maxMana << " MP)" << endl;
     }
 
     bool useMana(int amount) {
@@ -102,7 +104,7 @@ public:
             currentMana -= amount;
             return true;
         }
-        std::cout << "Not enough mana!" << std::endl;
+        cout << "Not enough mana!" << endl;
         return false;
     }
 
@@ -115,7 +117,7 @@ public:
     // Experience and leveling
     void gainExperience(int exp) {
         experience += exp;
-        std::cout << "Gained " << exp << " experience!" << std::endl;
+        cout << "Gained " << exp << " experience!" << endl;
 
         // Simple level up: every 100 exp = 1 level
         int expNeeded = level * 100;
@@ -138,9 +140,9 @@ public:
         intelligence += 2;
         agility += 1;
 
-        std::cout << "\n*** LEVEL UP! ***" << std::endl;
-        std::cout << name << " reached level " << level << "!" << std::endl;
-        std::cout << "All stats increased!" << std::endl;
+        cout << "\n*** LEVEL UP! ***" << endl;
+        cout << name << " reached level " << level << "!" << endl;
+        cout << "All stats increased!" << endl;
     }
 
     bool isAlive() const {
@@ -148,11 +150,11 @@ public:
     }
 
     void displayStats() const {
-        std::cout << "\n=== " << name << " (Level " << level << ") ===" << std::endl;
-        std::cout << "HP: " << currentHealth << "/" << maxHealth << std::endl;
-        std::cout << "MP: " << currentMana << "/" << maxMana << std::endl;
-        std::cout << "STR: " << strength << " | DEF: " << defense << std::endl;
-        std::cout << "INT: " << intelligence << " | AGI: " << agility << std::endl;
-        std::cout << "Experience: " << experience << "/" << (level * 100) << std::endl;
+        cout << "\n=== " << name << " (Level " << level << ") ===" << endl;
+        cout << "HP: " << currentHealth << "/" << maxHealth << endl;
+        cout << "MP: " << currentMana << "/" << maxMana << endl;
+        cout << "STR: " << strength << " | DEF: " << defense << endl;
+        cout << "INT: " << intelligence << " | AGI: " << agility << endl;
+        cout << "Experience: " << experience << "/" << (level * 100) << endl;
     }
 };

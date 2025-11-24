@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <initializer_list>
 #include "DoublyLinkedNode.h"
 #include "BidirectionalIterator.h"
 
@@ -21,6 +22,13 @@ public:
     }
 
     List(): head(&Node::NIL), tail(&Node::NIL), count(0) {}
+
+    // Initializer-list constructor
+    List(std::initializer_list<T> ilist): head(&Node::NIL), tail(&Node::NIL), count(0) {
+        for (const T& value : ilist) {
+            push(value);
+        }
+    }
 
     // Copy constructor - deep copy all nodes
     List(const List& other): head(&Node::NIL), tail(&Node::NIL), count(0) {
@@ -47,8 +55,11 @@ public:
     }
 
     void clear() {
-        while (!isEmpty()) {
-            pop();
+        Node* current = head;
+        while (current != &Node::NIL) {
+            Node* toDelete = current;
+            current = current->getNext();
+            delete toDelete;
         }
         head = &Node::NIL;
         tail = &Node::NIL;
@@ -140,7 +151,7 @@ public:
     }
 
     void insertAt(const int index, const T value) {
-        if (index < 0 || index >= count) {
+        if (index < 0 || index > count) {
             throw std::out_of_range("Index out of range.");
         }
 
@@ -186,54 +197,24 @@ public:
     }
 
     void removeAt(int index) {
-        if (index < 0 || index >= count) {
+        if (index < 0 || index >= count) { // Use >= here
             throw std::out_of_range("Index out of range.");
         }
 
-        int currIndex = 0;
-        BidirectionalIterator<T> it(head);
-
-        while (it != it.end()) {
-            if (currIndex == index) {
-                Node* toDelete = it.getCurrent();
-                if (toDelete == head) {
-                    head = head->getNext();
-                    if (head != &Node::NIL) {
-                        head->setPrevious(&Node::NIL);
-                    }
-                    else {
-                        tail = &Node::NIL;
-                    }
-                }
-                else if (toDelete == tail) {
-                    tail = tail->getPrevious();
-                    if (tail != &Node::NIL) {
-                        tail->setNext(&Node::NIL);
-                    }
-                    else {
-                        head = &Node::NIL;
-                    }
-                }
-                else {
-                    // Node is in the middle - unlink it properly
-                    Node* prevNode = toDelete->getPrevious();
-                    Node* nextNode = toDelete->getNext();
-                    if (prevNode != &Node::NIL) {
-                        prevNode->setNext(nextNode);
-                    }
-                    if (nextNode != &Node::NIL) {
-                        nextNode->setPrevious(prevNode);
-                    }
-                }
-
-                delete toDelete;
-                --count;
-                break;
-            }
-
-            ++currIndex;
-            ++it;
+        if (index == 0) {
+            shift();
+            return;
         }
+        if (index == count - 1) {
+            pop();
+            return;
+        }
+
+        Node* toDelete = get(index); // Re-use get(index) to find the node
+        toDelete->getPrevious()->setNext(toDelete->getNext());
+        toDelete->getNext()->setPrevious(toDelete->getPrevious());
+        delete toDelete;
+        --count;
     }
 
     Node* get(int index) {
@@ -276,6 +257,25 @@ public:
         throw std::out_of_range("Index out of range.");
     }
 
+    const T& operator[](const int index) const {
+        if (index >= count) {
+            throw std::out_of_range("Index out of range.");
+        }
+
+        int currIndex = 0;
+        BidirectionalIterator<T> it(head);
+
+        while (it != it.end()) {
+            if (currIndex == index) {
+                return it.getCurrent()->getValue();
+            }
+            ++currIndex;
+            ++it;
+        }
+
+        throw std::out_of_range("Index out of range.");
+    }
+
     T& getFirst() {
         return head->getValue();
     }
@@ -296,4 +296,17 @@ public:
     BidirectionalIterator<T> getReverseIterator() {
         return BidirectionalIterator<T>(tail);
     }
+
+    // For range-based for loops
+    BidirectionalIterator<T> begin() {
+        return BidirectionalIterator<T>(head);
+    }
+
+    BidirectionalIterator<T> end() {
+        return BidirectionalIterator<T>(&Node::NIL);
+    }
+
+    // Const versions for const objects
+    BidirectionalIterator<T> begin() const { return BidirectionalIterator<T>(head); }
+    BidirectionalIterator<T> end() const { return BidirectionalIterator<T>(&Node::NIL); }
 };

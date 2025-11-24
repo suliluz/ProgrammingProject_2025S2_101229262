@@ -1,10 +1,10 @@
-#ifndef SETTINGSSTATE_H
-#define SETTINGSSTATE_H
+#pragma once
 
 #include "GameState.h"
-#include "game/Settings.h"
 #include <SFML/Graphics.hpp>
-#include <vector>
+#include "List.h"
+
+using namespace std;
 
 class SettingsState : public GameState {
 public:
@@ -26,8 +26,8 @@ private:
 
     sf::Font font;
     sf::Text* title;
-    std::vector<sf::Text*> optionLabels;
-    std::vector<sf::Text*> optionValues;
+    List<sf::Text*> optionLabels;
+    List<sf::Text*> optionValues;
     int selectedOptionIndex;
 
     void moveUp();
@@ -37,5 +37,3 @@ private:
     void updateOptionTexts();
     void applySettings();
 };
-
-#endif //SETTINGSSTATE_H

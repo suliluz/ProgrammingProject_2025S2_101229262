@@ -3,14 +3,10 @@
 #include "List.h"
 #include "NTree.h"
 #include "Dialogue.h"
-#include "Choice.h"
 #include "game/Player.h"
 #include "game/Item.h"
 #include <string>
-#include <fstream>
-#include <sstream>
 #include <functional>
-#include <iostream>
 
 // MAX_CHOICES is defined in GameEngine.h
 #ifndef MAX_CHOICES

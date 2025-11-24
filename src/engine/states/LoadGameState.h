@@ -1,10 +1,11 @@
-#ifndef LOADGAMESTATE_H
-#define LOADGAMESTATE_H
+#pragma once
 
 #include "GameState.h"
 #include "game/SaveSystem.h"
+#include "List.h"
 #include <SFML/Graphics.hpp>
-#include <vector>
+
+using namespace std;
 
 class LoadGameState : public GameState {
 public:
@@ -24,12 +25,12 @@ private:
 
     sf::Font font;
     sf::Text* title;
-    std::vector<sf::Text*> slotTexts;
-    std::vector<sf::RectangleShape*> slotBoxes;
+    List<sf::Text*> slotTexts;
+    List<sf::RectangleShape*> slotBoxes;
 
     int selectedSlot;
     bool fromMainMenu;  // Track if we came from main menu or in-game
     SaveSlotInfo slots[SaveSystem::MAX_SAVE_SLOTS];
 };
 
-#endif //LOADGAMESTATE_H
+

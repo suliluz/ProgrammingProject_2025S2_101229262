@@ -1,6 +1,6 @@
+#include <iostream>
 #include "MainMenuState.h"
 #include "GameEngine.h"
-#include <iostream>
 #include "InGameState.h"
 #include "LoadGameState.h"
 #include "SettingsState.h"
@@ -23,7 +23,7 @@ MainMenuState::MainMenuState(GameEngine& game) : GameState(game), title(nullptr)
         sf::Text* text = new sf::Text(font, items[i], 30);
         text->setFillColor(sf::Color::White);
         text->setPosition({350, 200.f + i * 50.f});
-        menuItems.push_back(text);
+        menuItems.push(text);
     }
 
     menuItems[selectedItemIndex]->setFillColor(sf::Color::Yellow);
@@ -95,7 +95,7 @@ void MainMenuState::moveUp() {
 }
 
 void MainMenuState::moveDown() {
-    if (selectedItemIndex < menuItems.size() - 1) {
+    if (selectedItemIndex < menuItems.length() - 1) {
         menuItems[selectedItemIndex]->setFillColor(sf::Color::White);
         selectedItemIndex++;
         menuItems[selectedItemIndex]->setFillColor(sf::Color::Yellow);

@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace std;
+
 enum class WindowSize {
     SMALL,      // 800x600
     MEDIUM,     // 1024x768
@@ -101,7 +103,7 @@ public:
     }
 
     // Get display strings
-    std::string getWindowSizeString() const {
+    string getWindowSizeString() const {
         switch (windowSize) {
             case WindowSize::SMALL: return "800x600";
             case WindowSize::MEDIUM: return "1024x768";
@@ -111,7 +113,7 @@ public:
         return "Unknown";
     }
 
-    std::string getTextSpeedString() const {
+    string getTextSpeedString() const {
         switch (textSpeed) {
             case TextSpeed::SLOW: return "Slow";
             case TextSpeed::NORMAL: return "Normal";
@@ -122,10 +124,10 @@ public:
     }
 
     // Save/Load
-    bool save(const std::string& filename = "settings.dat") const {
-        std::ofstream file(filename, std::ios::binary);
+    bool save(const string& filename = "settings.dat") const {
+        ofstream file(filename, ios::binary);
         if (!file.is_open()) {
-            std::cerr << "Failed to save settings!" << std::endl;
+            cerr << "Failed to save settings!" << endl;
             return false;
         }
 
@@ -138,12 +140,12 @@ public:
         file.write(reinterpret_cast<const char*>(&autoSave), sizeof(autoSave));
 
         file.close();
-        std::cout << "Settings saved!" << std::endl;
+        cout << "Settings saved!" << endl;
         return true;
     }
 
-    bool load(const std::string& filename = "settings.dat") {
-        std::ifstream file(filename, std::ios::binary);
+    bool load(const string& filename = "settings.dat") {
+        ifstream file(filename, ios::binary);
         if (!file.is_open()) {
             return false;  // Use defaults if no settings file exists
         }
@@ -159,7 +161,7 @@ public:
         textSpeed = static_cast<TextSpeed>(ts);
 
         file.close();
-        std::cout << "Settings loaded!" << std::endl;
+        cout << "Settings loaded!" << endl;
         return true;
     }
 };

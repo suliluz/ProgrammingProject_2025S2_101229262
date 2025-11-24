@@ -1,7 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include "../dialogue/Dialogue.h"
+
+using namespace std;
 
 class DialogueManager {
 public:
@@ -16,13 +19,13 @@ private:
     void selectChoice(int index);
 
     sf::Font font;
-    sf::Text text;
-    std::string fullMessage;
-    std::string currentMessage;
+    sf::Text* text;
+    string fullMessage;
+    string currentMessage;
     sf::Time characterInterval;
     sf::Time elapsedTime;
     bool isDialogueActive;
-    std::vector<sf::Text> choiceTexts;
+    List<sf::Text*> choiceTexts;
     int selectedChoice;
     const Dialogue* currentDialogue;
 };

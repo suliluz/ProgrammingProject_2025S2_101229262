@@ -1,11 +1,13 @@
+#include <iostream>
 #include "InGameState.h"
 #include "MainMenuState.h"
 #include "LoadGameState.h"
 #include "GameEngine.h"
 #include "game/SaveSystem.h"
-#include <iostream>
 #include <optional>
 #include <SFML/Window/Event.hpp>
+
+using namespace std;
 
 InGameState::InGameState(GameEngine& game)
     : GameState(game),
@@ -17,11 +19,11 @@ InGameState::InGameState(GameEngine& game)
       saveButtonText(uiFont),
       loadButtonText(uiFont),
       exitButtonText(uiFont) {
-    std::cout << "InGameState constructor start" << std::endl;
+    cout << "InGameState constructor start" << endl;
 
     // Load UI font
     if (!uiFont.openFromFile("assets/arial.ttf")) {
-        std::cerr << "Error loading UI font" << std::endl;
+        cerr << "Error loading UI font" << endl;
     }
 
     // Initialize UI buttons (positioned at top right)
@@ -73,7 +75,7 @@ InGameState::InGameState(GameEngine& game)
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
         dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node) {
-            std::cout << "Dialogue start callback" << std::endl;
+            cout << "Dialogue start callback" << endl;
             if (node && !node->isEmpty()) {
                 currentDialogueNode = node;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
@@ -83,26 +85,26 @@ InGameState::InGameState(GameEngine& game)
         });
 
         auto* rootNode = dialogueGraph->buildTree();
-        std::cout << "Tree built" << std::endl;
+        cout << "Tree built" << endl;
         if (rootNode) {
             game.getPlayer().displayStatus();
             if (rootNode && !rootNode->isEmpty()) {
                 currentDialogueNode = rootNode;
-                std::cout << "Accepting visitor" << std::endl;
+                cout << "Accepting visitor" << endl;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
-                std::cout << "Visitor accepted" << std::endl;
+                cout << "Visitor accepted" << endl;
             } else {
                 currentDialogueNode = nullptr;
             }
         } else {
-            std::cerr << "Failed to build dialogue tree!" << std::endl;
+            cerr << "Failed to build dialogue tree!" << endl;
         }
     }
-    std::cout << "InGameState constructor end" << std::endl;
+    cout << "InGameState constructor end" << endl;
 }
 
 // Constructor for loading from saved node
-InGameState::InGameState(GameEngine& game, const std::string& startNodeId)
+InGameState::InGameState(GameEngine& game, const string& startNodeId)
     : GameState(game),
       dialogueVisitor(game.getWindow()),
       currentDialogueNode(nullptr),
@@ -112,11 +114,11 @@ InGameState::InGameState(GameEngine& game, const std::string& startNodeId)
       saveButtonText(uiFont),
       loadButtonText(uiFont),
       exitButtonText(uiFont) {
-    std::cout << "InGameState loading from node: " << startNodeId << std::endl;
+    cout << "InGameState loading from node: " << startNodeId << endl;
 
     // Load UI font and initialize buttons (same as above)
     if (!uiFont.openFromFile("assets/arial.ttf")) {
-        std::cerr << "Error loading UI font" << std::endl;
+        cerr << "Error loading UI font" << endl;
     }
 
     sf::Vector2u windowSize = game.getWindow().getSize();
@@ -178,16 +180,16 @@ InGameState::InGameState(GameEngine& game, const std::string& startNodeId)
                 currentDialogueNode = loadNode;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
             } else {
-                std::cerr << "Failed to find node: " << startNodeId << std::endl;
+                cerr << "Failed to find node: " << startNodeId << endl;
             }
         }
     }
 }
 
 void InGameState::handleInput() {
-    std::cout << "InGameState handleInput start" << std::endl;
+    cout << "InGameState handleInput start" << endl;
     while (const auto event = game.getWindow().pollEvent()) {
-        std::cout << "Event polled" << std::endl;
+        cout << "Event polled" << endl;
         if (event->is<sf::Event::Closed>()) {
             game.getWindow().close();
         }
@@ -211,9 +213,9 @@ void InGameState::handleInput() {
                 if (isMouseOverButton(saveButton, mousePos)) {
                     saveGame();
                 } else if (isMouseOverButton(loadButton, mousePos)) {
-                    game.changeState(std::make_unique<LoadGameState>(game, false));
+                    game.changeState(make_unique<LoadGameState>(game, false));
                 } else if (isMouseOverButton(exitButton, mousePos)) {
-                    game.changeState(std::make_unique<MainMenuState>(game));
+                    game.changeState(make_unique<MainMenuState>(game));
                 }
             }
         }
@@ -222,11 +224,11 @@ void InGameState::handleInput() {
             dialogueVisitor.handleInput(*event);
         }
     }
-    std::cout << "InGameState handleInput end" << std::endl;
+    cout << "InGameState handleInput end" << endl;
 }
 
 void InGameState::update(float dt) {
-    std::cout << "InGameState update start" << std::endl;
+    cout << "InGameState update start" << endl;
 
     // Update hover state for buttons
     sf::Vector2i mousePos = sf::Mouse::getPosition(game.getWindow());
@@ -243,11 +245,11 @@ void InGameState::update(float dt) {
     if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
         dialogueVisitor.update(sf::seconds(dt));
     }
-    std::cout << "InGameState update end" << std::endl;
+    cout << "InGameState update end" << endl;
 }
 
 void InGameState::render(sf::RenderWindow& window) {
-    std::cout << "InGameState render start" << std::endl;
+    cout << "InGameState render start" << endl;
     if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
         dialogueVisitor.render();
     }
@@ -255,15 +257,15 @@ void InGameState::render(sf::RenderWindow& window) {
     // Draw UI buttons
     drawUIButtons();
 
-    std::cout << "InGameState render end" << std::endl;
+    cout << "InGameState render end" << endl;
 }
 
 void InGameState::saveGame() {
-    std::cout << "Saving game to slot 0..." << std::endl;
+    cout << "Saving game to slot 0..." << endl;
     if (SaveSystem::saveToSlot(game.getPlayer(), currentNodeId, 0)) {
-        std::cout << "Game saved successfully to slot 0!" << std::endl;
+        cout << "Game saved successfully to slot 0!" << endl;
     } else {
-        std::cerr << "Failed to save game!" << std::endl;
+        cerr << "Failed to save game!" << endl;
     }
 }
 
@@ -277,9 +279,9 @@ void InGameState::drawUIButtons() {
             // Brighten button on hover
             sf::Color baseColor = buttons[i]->getFillColor();
             buttons[i]->setFillColor(sf::Color(
-                std::min(255, static_cast<int>(baseColor.r) + 30),
-                std::min(255, static_cast<int>(baseColor.g) + 30),
-                std::min(255, static_cast<int>(baseColor.b) + 30),
+                min(255, static_cast<int>(baseColor.r) + 30),
+                min(255, static_cast<int>(baseColor.g) + 30),
+                min(255, static_cast<int>(baseColor.b) + 30),
                 baseColor.a
             ));
             buttons[i]->setOutlineThickness(3);

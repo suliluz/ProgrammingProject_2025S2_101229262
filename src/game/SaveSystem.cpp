@@ -1,15 +1,17 @@
 #include "SaveSystem.h"
 #include <iostream>
 
-bool SaveSystem::saveGame(const Player& player, const std::string& currentNodeId, const std::string& filename) {
-    std::ofstream file(filename, std::ios::binary);
+using namespace std;
+
+bool SaveSystem::saveGame(const Player& player, const string& currentNodeId, const string& filename) {
+    ofstream file(filename, ios::binary);
     if (!file.is_open()) {
-        std::cerr << "Failed to create save file!" << std::endl;
+        cerr << "Failed to create save file!" << endl;
         return false;
     }
 
     // Save timestamp
-    std::time_t now = std::time(nullptr);
+    time_t now = time(nullptr);
     writeTime(file, now);
 
     // Save player data
@@ -36,14 +38,14 @@ bool SaveSystem::saveGame(const Player& player, const std::string& currentNodeId
     writeString(file, currentNodeId);
 
     file.close();
-    std::cout << "Game saved successfully!" << std::endl;
+    cout << "Game saved successfully!" << endl;
     return true;
 }
 
-bool SaveSystem::loadGame(Player& player, std::string& currentNodeId, const std::string& filename) {
-    std::ifstream file(filename, std::ios::binary);
+bool SaveSystem::loadGame(Player& player, string& currentNodeId, const string& filename) {
+    ifstream file(filename, ios::binary);
     if (!file.is_open()) {
-        std::cerr << "Failed to open save file!" << std::endl;
+        cerr << "Failed to open save file!" << endl;
         return false;
     }
 
@@ -51,7 +53,7 @@ bool SaveSystem::loadGame(Player& player, std::string& currentNodeId, const std:
     readTime(file);
 
     // Load player name (we don't need it, but read it anyway to advance file position)
-    std::string savedName = readString(file);
+    string savedName = readString(file);
 
     // Load stats
     int hp = readInt(file);
@@ -85,51 +87,51 @@ bool SaveSystem::loadGame(Player& player, std::string& currentNodeId, const std:
     currentNodeId = readString(file);
 
     file.close();
-    std::cout << "Game loaded successfully!" << std::endl;
+    cout << "Game loaded successfully!" << endl;
     return true;
 }
 
-bool SaveSystem::saveExists(const std::string& filename) {
-    std::ifstream file(filename);
+bool SaveSystem::saveExists(const string& filename) {
+    ifstream file(filename);
     return file.good();
 }
 
-void SaveSystem::writeString(std::ofstream& file, const std::string& str) {
+void SaveSystem::writeString(ofstream& file, const string& str) {
     int length = str.length();
     file.write(reinterpret_cast<const char*>(&length), sizeof(length));
     file.write(str.c_str(), length);
 }
 
-std::string SaveSystem::readString(std::ifstream& file) {
+string SaveSystem::readString(ifstream& file) {
     int length;
     file.read(reinterpret_cast<char*>(&length), sizeof(length));
-    std::string str(length, '\0');
+    string str(length, '\0');
     file.read(&str[0], length);
     return str;
 }
 
-void SaveSystem::writeInt(std::ofstream& file, int value) {
+void SaveSystem::writeInt(ofstream& file, int value) {
     file.write(reinterpret_cast<const char*>(&value), sizeof(value));
 }
 
-int SaveSystem::readInt(std::ifstream& file) {
+int SaveSystem::readInt(ifstream& file) {
     int value;
     file.read(reinterpret_cast<char*>(&value), sizeof(value));
     return value;
 }
 
-void SaveSystem::writeTime(std::ofstream& file, std::time_t value) {
+void SaveSystem::writeTime(ofstream& file, time_t value) {
     file.write(reinterpret_cast<const char*>(&value), sizeof(value));
 }
 
-std::time_t SaveSystem::readTime(std::ifstream& file) {
-    std::time_t value;
+time_t SaveSystem::readTime(ifstream& file) {
+    time_t value;
     file.read(reinterpret_cast<char*>(&value), sizeof(value));
     return value;
 }
 
-std::string SaveSystem::getSlotFilename(int slotIndex) {
-    return "save_slot_" + std::to_string(slotIndex) + ".dat";
+string SaveSystem::getSlotFilename(int slotIndex) {
+    return "save_slot_" + to_string(slotIndex) + ".dat";
 }
 
 SaveSlotInfo SaveSystem::getSlotInfo(int slotIndex) {
@@ -145,7 +147,7 @@ SaveSlotInfo SaveSystem::getSlotInfo(int slotIndex) {
     }
 
     // Read save file metadata
-    std::ifstream file(info.filename, std::ios::binary);
+    ifstream file(info.filename, ios::binary);
     if (!file.is_open()) {
         info.exists = false;
         info.playerName = "Empty Slot";
@@ -172,10 +174,10 @@ SaveSlotInfo SaveSystem::getSlotInfo(int slotIndex) {
     return info;
 }
 
-bool SaveSystem::saveToSlot(const Player& player, const std::string& currentNodeId, int slotIndex) {
+bool SaveSystem::saveToSlot(const Player& player, const string& currentNodeId, int slotIndex) {
     return saveGame(player, currentNodeId, getSlotFilename(slotIndex));
 }
 
-bool SaveSystem::loadFromSlot(Player& player, std::string& currentNodeId, int slotIndex) {
+bool SaveSystem::loadFromSlot(Player& player, string& currentNodeId, int slotIndex) {
     return loadGame(player, currentNodeId, getSlotFilename(slotIndex));
 }

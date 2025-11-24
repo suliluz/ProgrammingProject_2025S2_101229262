@@ -2,14 +2,15 @@
 
 #include <string>
 #include <fstream>
-#include <ctime>
 #include "game/Player.h"
 
+using namespace std;
+
 struct SaveSlotInfo {
-    std::string filename;
-    std::string playerName;
+    string filename;
+    string playerName;
     int level;
-    std::time_t timestamp;
+    time_t timestamp;
     bool exists;
 };
 
@@ -17,21 +18,21 @@ class SaveSystem {
 public:
     static constexpr int MAX_SAVE_SLOTS = 3;
 
-    static bool saveGame(const Player& player, const std::string& currentNodeId, const std::string& filename = "savegame.dat");
-    static bool loadGame(Player& player, std::string& currentNodeId, const std::string& filename = "savegame.dat");
-    static bool saveExists(const std::string& filename = "savegame.dat");
+    static bool saveGame(const Player& player, const string& currentNodeId, const string& filename = "savegame.dat");
+    static bool loadGame(Player& player, string& currentNodeId, const string& filename = "savegame.dat");
+    static bool saveExists(const string& filename = "savegame.dat");
 
     // Save slot management
-    static std::string getSlotFilename(int slotIndex);
+    static string getSlotFilename(int slotIndex);
     static SaveSlotInfo getSlotInfo(int slotIndex);
-    static bool saveToSlot(const Player& player, const std::string& currentNodeId, int slotIndex);
-    static bool loadFromSlot(Player& player, std::string& currentNodeId, int slotIndex);
+    static bool saveToSlot(const Player& player, const string& currentNodeId, int slotIndex);
+    static bool loadFromSlot(Player& player, string& currentNodeId, int slotIndex);
 
 private:
-    static void writeString(std::ofstream& file, const std::string& str);
-    static std::string readString(std::ifstream& file);
-    static void writeInt(std::ofstream& file, int value);
-    static int readInt(std::ifstream& file);
-    static void writeTime(std::ofstream& file, std::time_t value);
-    static std::time_t readTime(std::ifstream& file);
+    static void writeString(ofstream& file, const string& str);
+    static string readString(ifstream& file);
+    static void writeInt(ofstream& file, int value);
+    static int readInt(ifstream& file);
+    static void writeTime(ofstream& file, time_t value);
+    static time_t readTime(ifstream& file);
 };

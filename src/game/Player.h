@@ -3,6 +3,8 @@
 #include "Inventory.h"
 #include "Item.h"
 
+using namespace std;
+
 class Player {
 private:
     PlayerStats stats;
@@ -15,7 +17,7 @@ private:
 public:
     Player() : stats("Hero"), inventory(100), equippedWeapon(nullptr), equippedArmor(nullptr) {}
 
-    Player(const std::string& name) : stats(name), inventory(100), equippedWeapon(nullptr), equippedArmor(nullptr) {}
+    Player(const string& name) : stats(name), inventory(100), equippedWeapon(nullptr), equippedArmor(nullptr) {}
 
     // Access to stats
     PlayerStats& getStats() { return stats; }
@@ -30,10 +32,10 @@ public:
         return inventory.addItem(item);
     }
 
-    bool useItem(const std::string& itemName) {
+    bool useItem(const string& itemName) {
         Item* item = inventory.findItem(itemName);
         if (!item) {
-            std::cout << "Item not found in inventory." << std::endl;
+            cout << "Item not found in inventory." << endl;
             return false;
         }
 
@@ -55,15 +57,15 @@ public:
             return true;
         }
         else {
-            std::cout << "Cannot use " << itemName << std::endl;
+            cout << "Cannot use " << itemName << endl;
             return false;
         }
     }
 
-    void equipItem(const std::string& itemName) {
+    void equipItem(const string& itemName) {
         Item* item = inventory.findItem(itemName);
         if (!item) {
-            std::cout << "Item not found in inventory." << std::endl;
+            cout << "Item not found in inventory." << endl;
             return;
         }
 
@@ -71,30 +73,30 @@ public:
             if (equippedWeapon) {
                 // Unequip current weapon
                 stats.modifyStrength(-equippedWeapon->attackBonus);
-                std::cout << "Unequipped " << equippedWeapon->name << std::endl;
+                cout << "Unequipped " << equippedWeapon->name << endl;
             }
 
             equippedWeapon = item;
             stats.modifyStrength(item->attackBonus);
-            std::cout << "Equipped " << item->name << " (+" << item->attackBonus << " STR)" << std::endl;
+            cout << "Equipped " << item->name << " (+" << item->attackBonus << " STR)" << endl;
         }
         else if (item->type == ItemType::ARMOR) {
             if (equippedArmor) {
                 // Unequip current armor
                 stats.modifyDefense(-equippedArmor->defenseBonus);
-                std::cout << "Unequipped " << equippedArmor->name << std::endl;
+                cout << "Unequipped " << equippedArmor->name << endl;
             }
 
             equippedArmor = item;
             stats.modifyDefense(item->defenseBonus);
-            std::cout << "Equipped " << item->name << " (+" << item->defenseBonus << " DEF)" << std::endl;
+            cout << "Equipped " << item->name << " (+" << item->defenseBonus << " DEF)" << endl;
         }
     }
 
     void unequipWeapon() {
         if (equippedWeapon) {
             stats.modifyStrength(-equippedWeapon->attackBonus);
-            std::cout << "Unequipped " << equippedWeapon->name << std::endl;
+            cout << "Unequipped " << equippedWeapon->name << endl;
             equippedWeapon = nullptr;
         }
     }
@@ -102,7 +104,7 @@ public:
     void unequipArmor() {
         if (equippedArmor) {
             stats.modifyDefense(-equippedArmor->defenseBonus);
-            std::cout << "Unequipped " << equippedArmor->name << std::endl;
+            cout << "Unequipped " << equippedArmor->name << endl;
             equippedArmor = nullptr;
         }
     }
@@ -115,7 +117,7 @@ public:
         return false;
     }
 
-    bool sellItem(const std::string& itemName, int price) {
+    bool sellItem(const string& itemName, int price) {
         if (inventory.removeItem(itemName)) {
             inventory.addGold(price);
             return true;
@@ -127,19 +129,19 @@ public:
     void displayStatus() const {
         stats.displayStats();
 
-        std::cout << "\nEquipped:" << std::endl;
+        cout << "\nEquipped:" << endl;
         if (equippedWeapon) {
-            std::cout << "  Weapon: " << equippedWeapon->name
-                     << " (+" << equippedWeapon->attackBonus << " ATK)" << std::endl;
+            cout << "  Weapon: " << equippedWeapon->name
+                     << " (+" << equippedWeapon->attackBonus << " ATK)" << endl;
         } else {
-            std::cout << "  Weapon: None" << std::endl;
+            cout << "  Weapon: None" << endl;
         }
 
         if (equippedArmor) {
-            std::cout << "  Armor: " << equippedArmor->name
-                     << " (+" << equippedArmor->defenseBonus << " DEF)" << std::endl;
+            cout << "  Armor: " << equippedArmor->name
+                     << " (+" << equippedArmor->defenseBonus << " DEF)" << endl;
         } else {
-            std::cout << "  Armor: None" << std::endl;
+            cout << "  Armor: None" << endl;
         }
 
         inventory.displayInventory();

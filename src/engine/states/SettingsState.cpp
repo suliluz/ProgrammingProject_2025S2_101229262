@@ -6,7 +6,7 @@
 
 SettingsState::SettingsState(GameEngine& game) : GameState(game), title(nullptr), selectedOptionIndex(0) {
     if (!font.openFromFile("assets/arial.ttf")) {
-        std::cerr << "Failed to load font!" << std::endl;
+        cerr << "Failed to load font!" << endl;
     }
 
     title = new sf::Text(font);
@@ -16,7 +16,7 @@ SettingsState::SettingsState(GameEngine& game) : GameState(game), title(nullptr)
     title->setPosition({400, 50});
 
     // Create option labels
-    std::vector<std::string> labels = {
+    List<string> labels = {
         "Window Size:",
         "Text Speed:",
         "Master Volume:",
@@ -24,19 +24,19 @@ SettingsState::SettingsState(GameEngine& game) : GameState(game), title(nullptr)
         "Back to Menu"
     };
 
-    for (size_t i = 0; i < labels.size(); ++i) {
+    for (size_t i = 0; i < labels.length(); ++i) {
         sf::Text* label = new sf::Text(font, labels[i], 28);
         label->setFillColor(sf::Color::White);
         label->setPosition({200, 150.f + i * 80.f});
-        optionLabels.push_back(label);
+        optionLabels.push(label);
 
         // Create value text (not for "Back")
-        if (i < labels.size() - 1) {
+        if (i < labels.length() - 1) {
             sf::Text* value = new sf::Text(font);
             value->setCharacterSize(28);
             value->setFillColor(sf::Color::Yellow);
             value->setPosition({550, 150.f + i * 80.f});
-            optionValues.push_back(value);
+            optionValues.push(value);
         }
     }
 
@@ -71,11 +71,11 @@ void SettingsState::handleInput() {
             } else if (keyPressed->code == sf::Keyboard::Key::Enter) {
                 if (selectedOptionIndex == 4) { // Back option
                     applySettings();
-                    game.changeState(std::make_unique<MainMenuState>(game));
+                    game.changeState(make_unique<MainMenuState>(game));
                 }
             } else if (keyPressed->code == sf::Keyboard::Key::Escape) {
                 applySettings();
-                game.changeState(std::make_unique<MainMenuState>(game));
+                game.changeState(make_unique<MainMenuState>(game));
             }
         }
     }
@@ -83,15 +83,15 @@ void SettingsState::handleInput() {
 
 void SettingsState::update(float dt) {
     // Update highlight
-    for (size_t i = 0; i < optionLabels.size(); ++i) {
+    for (size_t i = 0; i < optionLabels.length(); ++i) {
         if (i == selectedOptionIndex) {
             optionLabels[i]->setFillColor(sf::Color::Yellow);
-            if (i < optionValues.size()) {
+            if (i < optionValues.length()) {
                 optionValues[i]->setFillColor(sf::Color::Yellow);
             }
         } else {
             optionLabels[i]->setFillColor(sf::Color::White);
-            if (i < optionValues.size()) {
+            if (i < optionValues.length()) {
                 optionValues[i]->setFillColor(sf::Color(200, 200, 200));
             }
         }
@@ -125,7 +125,7 @@ void SettingsState::moveUp() {
 }
 
 void SettingsState::moveDown() {
-    if (selectedOptionIndex < static_cast<int>(optionLabels.size()) - 1) {
+    if (selectedOptionIndex < optionLabels.length() - 1) {
         selectedOptionIndex++;
     }
 }
@@ -224,5 +224,5 @@ void SettingsState::applySettings() {
         game.getWindow().create(sf::VideoMode({width, height}), "RPG Game");
     }
 
-    std::cout << "Settings applied! Window resized to " << width << "x" << height << std::endl;
+    cout << "Settings applied! Window resized to " << width << "x" << height << endl;
 }

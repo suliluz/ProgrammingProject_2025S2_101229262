@@ -1,17 +1,18 @@
+#include <iostream>
 #include "LoadGameState.h"
 #include "MainMenuState.h"
 #include "InGameState.h"
 #include "GameEngine.h"
-#include <iostream>
 #include <sstream>
-#include <iomanip>
 #include <SFML/Window/Event.hpp>
+
+using namespace std;
 
 LoadGameState::LoadGameState(GameEngine& game, bool fromMainMenu)
     : GameState(game), title(nullptr), selectedSlot(0), fromMainMenu(fromMainMenu) {
 
     if (!font.openFromFile("assets/arial.ttf")) {
-        std::cerr << "Failed to load font!" << std::endl;
+        cerr << "Failed to load font!" << endl;
     }
 
     title = new sf::Text(font);
@@ -30,14 +31,14 @@ LoadGameState::LoadGameState(GameEngine& game, bool fromMainMenu)
         box->setFillColor(sf::Color(40, 40, 60, 180));
         box->setOutlineColor(sf::Color(100, 100, 120));
         box->setOutlineThickness(2);
-        slotBoxes.push_back(box);
+        slotBoxes.push(box);
 
         // Create slot text
         auto* text = new sf::Text(font);
         text->setCharacterSize(24);
         text->setFillColor(sf::Color::White);
         text->setPosition({270, 160.f + i * 140.f});
-        slotTexts.push_back(text);
+        slotTexts.push(text);
     }
 
     updateSlotDisplay();
@@ -48,6 +49,7 @@ LoadGameState::~LoadGameState() {
     for (auto* text : slotTexts) {
         delete text;
     }
+
     for (auto* box : slotBoxes) {
         delete box;
     }
@@ -75,7 +77,7 @@ void LoadGameState::handleInput() {
 
 void LoadGameState::update(float dt) {
     // Update slot highlights
-    for (size_t i = 0; i < slotBoxes.size(); ++i) {
+    for (size_t i = 0; i < slotBoxes.length(); ++i) {
         if (static_cast<int>(i) == selectedSlot) {
             slotBoxes[i]->setFillColor(sf::Color(80, 120, 180, 200));
             slotBoxes[i]->setOutlineColor(sf::Color(150, 200, 255));
@@ -124,33 +126,33 @@ void LoadGameState::moveDown() {
 
 void LoadGameState::selectSlot() {
     if (!slots[selectedSlot].exists) {
-        std::cout << "No save data in this slot!" << std::endl;
+        cout << "No save data in this slot!" << endl;
         return;
     }
 
     // Load the game
-    std::string nodeId;
+    string nodeId;
     if (SaveSystem::loadFromSlot(game.getPlayer(), nodeId, selectedSlot)) {
         // Transition to InGameState with the loaded node
-        game.changeState(std::make_unique<InGameState>(game, nodeId));
+        game.changeState(make_unique<InGameState>(game, nodeId));
     } else {
-        std::cerr << "Failed to load game from slot " << selectedSlot << std::endl;
+        cerr << "Failed to load game from slot " << selectedSlot << endl;
     }
 }
 
 void LoadGameState::goBack() {
     if (fromMainMenu) {
-        game.changeState(std::make_unique<MainMenuState>(game));
+        game.changeState(make_unique<MainMenuState>(game));
     } else {
         // Return to previous state (would need state stack for this)
         // For now, just go to main menu
-        game.changeState(std::make_unique<MainMenuState>(game));
+        game.changeState(make_unique<MainMenuState>(game));
     }
 }
 
 void LoadGameState::updateSlotDisplay() {
     for (int i = 0; i < SaveSystem::MAX_SAVE_SLOTS; ++i) {
-        std::ostringstream oss;
+                ostringstream oss;
         oss << "Slot " << (i + 1) << ": ";
 
         if (slots[i].exists) {
@@ -158,9 +160,9 @@ void LoadGameState::updateSlotDisplay() {
 
             // Format timestamp
             if (slots[i].timestamp > 0) {
-                std::tm* timeinfo = std::localtime(&slots[i].timestamp);
+                tm* timeinfo = localtime(&slots[i].timestamp);
                 char buffer[80];
-                std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M", timeinfo);
+                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M", timeinfo);
                 oss << "\n         Saved: " << buffer;
             }
         } else {

@@ -1,7 +1,8 @@
 #include "GameEngine.h"
 #include <iostream>
-#include <optional>
 #include "states/GameState.h"
+
+using namespace std;
 
 GameEngine::GameEngine() : currentState(nullptr), pendingState(nullptr), player("Hero"), dialogueGraph(nullptr) {
     // Load settings
@@ -35,10 +36,10 @@ void GameEngine::loadDialogues() {
         dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_industry.txt");
         dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_predation.txt");
         dialogueGraph->loadAdditionalFile("assets/dialogues/ending.txt");
-        std::cout << "Dialogues loaded successfully!" << std::endl;
+        cout << "Dialogues loaded successfully!" << endl;
 
     } else {
-        std::cerr << "Failed to load initial dialogue file!" << std::endl;
+        cerr << "Failed to load initial dialogue file!" << endl;
     }
 }
 
@@ -46,8 +47,8 @@ GameEngine::~GameEngine() {
     delete dialogueGraph;
 }
 
-void GameEngine::changeState(std::unique_ptr<GameState> state) {
-    pendingState = std::move(state);
+void GameEngine::changeState(unique_ptr<GameState> state) {
+    pendingState = move(state);
 }
 
 void GameEngine::run() {
@@ -57,7 +58,7 @@ void GameEngine::run() {
 
         // Apply pending state change at the start of the frame
         if (pendingState) {
-            currentState = std::move(pendingState);
+            currentState = move(pendingState);
             pendingState = nullptr;
         }
 

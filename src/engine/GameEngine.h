@@ -5,15 +5,16 @@
 #include "dialogue/DialogueGraph.h"
 #include "game/Player.h"
 #include "game/Settings.h"
-#include "NTree.h"
-#include "states/GameState.h" // Include the new GameState header
+#include "states/GameState.h"
+
+using namespace std;
 
 class GameEngine {
 public:
     GameEngine();
     ~GameEngine();
     void run();
-    void changeState(std::unique_ptr<GameState> state);
+    void changeState(unique_ptr<GameState> state);
 
     Player& getPlayer() { return player; }
     sf::RenderWindow& getWindow() { return window; }
@@ -28,8 +29,8 @@ private:
     void loadDialogues();
 
     sf::RenderWindow window;
-    std::unique_ptr<GameState> currentState;
-    std::unique_ptr<GameState> pendingState;  // State to switch to on next frame
+    unique_ptr<GameState> currentState;
+    unique_ptr<GameState> pendingState;  // State to switch to on next frame
 
     Player player;
     DialogueGraph* dialogueGraph;

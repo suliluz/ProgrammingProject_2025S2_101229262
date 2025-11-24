@@ -58,6 +58,16 @@ public:
         return os;
     }
 
+    // Dereference operator
+    T& operator*() const {
+        return current->getValue();
+    }
+
+    // Arrow operator
+    T* operator->() const {
+        return &(current->getValue());
+    }
+
     Node* getCurrent() {
         return current;
     }
