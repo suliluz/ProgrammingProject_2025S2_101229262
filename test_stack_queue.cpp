@@ -113,10 +113,6 @@ int main() {
         testQueueWithStrings();
 
         std::cout << "\n✓ All tests passed successfully!" << std::endl;
-        std::cout << "\nMemory efficiency improvements:" << std::endl;
-        std::cout << "  • Stack now uses SinglyLinkedNode (50% less memory per node)" << std::endl;
-        std::cout << "  • Queue now uses SinglyLinkedNode (50% less memory per node)" << std::endl;
-        std::cout << "  • All operations remain O(1) time complexity" << std::endl;
 
     } catch (const std::exception& e) {
         std::cerr << "Test failed with exception: " << e.what() << std::endl;

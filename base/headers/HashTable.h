@@ -44,25 +44,21 @@ public:
         size_t index = getIndex(key);
         Bucket& bucket = table[index];
 
-        // Check if key already exists
         auto it = bucket.getIterator();
         auto endIt = it.end();
 
         while (it != endIt) {
             if (it.getCurrent()->getValue().key == key) {
-                // Key exists, update value
                 it.getCurrent()->getValue().value = value;
                 return &(it.getCurrent()->getValue().value);
             }
             ++it;
         }
 
-        // Key not found, insert new entry
         currentSize++;
         return &(bucket.push(Entry(key, value))->getValue().value);
     }
 
-    // Get a value by key
     bool get(const K& key, V& value) {
         size_t index = getIndex(key);
         Bucket& bucket = table[index];
@@ -80,7 +76,6 @@ public:
         return false;
     }
 
-    // Search for a key and return pointer to value (or nullptr if not found)
     V* search(const K& key) {
         size_t index = getIndex(key);
         Bucket& bucket = table[index];
@@ -97,7 +92,6 @@ public:
         return nullptr;
     }
 
-    // Remove a key-value pair
     bool remove(const K& key) {
         size_t index = getIndex(key);
         Bucket& bucket = table[index];

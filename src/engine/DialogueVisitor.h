@@ -7,10 +7,12 @@
 
 using namespace std;
 
+class Player; // Forward declaration
+
 class DialogueVisitor : public Visitor {
 public:
-    DialogueVisitor(sf::RenderWindow& window);
-    ~DialogueVisitor();
+    explicit DialogueVisitor(sf::RenderWindow& window);
+    ~DialogueVisitor() override;
 
     void visit(Dialogue& dialogue) override;
     void visit(Choice& choice) override;
@@ -19,15 +21,19 @@ public:
     void handleInput(const sf::Event& event);
     void render();
 
+    void setPlayer(Player* player) { this->player = player; }
+
     bool isDialogueActive() const { return dialogueActive; }
     void setTextSpeed(float speed); // Speed multiplier (1.0 = normal, 2.0 = 2x faster, etc.)
     void skipToEnd(); // Fast-forward to show full text immediately
+    void toggleInventoryView() { showInventory = !showInventory; }
 
 private:
     void nextCharacter();
     void selectChoice(int index);
     void clearChoices();
-    void drawSpeakerName(const string& speaker);
+    void drawStatsPanel();
+    void drawInventoryPanel();
     string wrapText(const string& text, float maxWidth);
 
     sf::RenderWindow& window;
@@ -44,4 +50,6 @@ private:
     List<sf::Text*> choiceTexts;
     int selectedChoice;
     Dialogue* currentDialogue;
+    Player* player;
+    bool showInventory;
 };

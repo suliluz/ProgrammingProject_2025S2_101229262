@@ -3,6 +3,7 @@
 #include "GameState.h"
 #include <SFML/Graphics.hpp>
 #include "List.h"
+#include "AssetPaths.h"
 
 using namespace std;
 

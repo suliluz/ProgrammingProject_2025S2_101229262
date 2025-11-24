@@ -89,8 +89,11 @@ Conditions determine if a choice is available. If the condition evaluates to fal
 Supported conditions:
 - `gold>=X` - Player has at least X gold
 - `gold>X` - Player has more than X gold
+- `mana>=X` - Player has at least X mana
 - `level>=X` - Player is at least level X
 - `hasitem:ItemName` - Player has the item in inventory
+
+Multiple conditions can be chained on the same line. The choice will only be available if ALL conditions are met.
 
 Examples:
 ```

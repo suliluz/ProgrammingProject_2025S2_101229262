@@ -24,14 +24,14 @@ public:
 
         Action();
         Action(Type t, int val);
-        Action(Type t, const string& str, int val = 0);
+        Action(Type t, string str, int val = 0);
     };
 
     struct ChoiceInfo {
         string text;
         string targetNodeId;
         List<Action> actions;
-        string condition; // e.g., "gold>=30"
+        List<string> condition; // e.g., "gold>=30"
 
         ChoiceInfo();
     };
@@ -72,9 +72,9 @@ private:
     function<void()> createAction(const ChoiceInfo& choiceInfo, NTree<Dialogue, MAX_CHOICES>* targetNode);
     void executeAction(const Action& action);
     bool evaluateCondition(const string& condition);
-    Item createItemFromString(const string& itemStr);
-    ItemType stringToItemType(const string& typeStr);
-    ChoiceInfo parseChoice(const string& choiceLine);
+    static Item createItemFromString(const string& itemStr);
+    static ItemType stringToItemType(const string& typeStr);
+    static ChoiceInfo parseChoice(const string& choiceLine);
     static string trim(const string& str);
     static List<string> split(const string& str, char delimiter);
 };

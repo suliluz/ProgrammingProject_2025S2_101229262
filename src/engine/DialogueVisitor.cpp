@@ -1,9 +1,10 @@
 #include "DialogueVisitor.h"
 #include <iostream>
+#include "game/Player.h"
 
 DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
     : window(win), baseCharacterInterval(sf::seconds(0.05f)), characterInterval(sf::seconds(0.05f)),
-      dialogueActive(false), selectedChoice(0), currentDialogue(nullptr) {
+      dialogueActive(false), selectedChoice(0), currentDialogue(nullptr), player(nullptr), showInventory(false) {
     cout << "DialogueVisitor constructor start" << endl;
     if (!font.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading font" << endl;
@@ -73,8 +74,6 @@ void DialogueVisitor::visit(Choice& choice) {
     if (choice.action) {
         choice.action();
     }
-    // Don't set dialogueActive to false here - the action callback
-    // will call startDialogue() which will set up the next dialogue
 }
 
 void DialogueVisitor::update(sf::Time deltaTime) {
@@ -95,6 +94,9 @@ void DialogueVisitor::update(sf::Time deltaTime) {
 
 void DialogueVisitor::render() {
     if (!dialogueActive) return;
+
+    // Draw player stats panel first
+    drawStatsPanel();
 
     // Get window size for responsive positioning
     sf::Vector2u windowSize = window.getSize();
@@ -210,12 +212,23 @@ void DialogueVisitor::render() {
             }
         }
     }
+
+    // Draw inventory panel if toggled on
+    if (showInventory) {
+        drawInventoryPanel();
+    }
 }
 
 void DialogueVisitor::handleInput(const sf::Event& event) {
     if (!dialogueActive) return;
 
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
+        // 'I' key to toggle inventory
+        if (keyPressed->code == sf::Keyboard::Key::I) {
+            toggleInventoryView();
+            return;
+        }
+
         // Space bar to skip/fast-forward text animation
         if (keyPressed->code == sf::Keyboard::Key::Space) {
             if (currentMessage.length() < fullMessage.length()) {
@@ -316,6 +329,236 @@ string DialogueVisitor::wrapText(const string& text, float maxWidth) {
     }
 
     return result;
+}
+
+void DialogueVisitor::drawStatsPanel() {
+    if (!player) return;
+
+    sf::Vector2u windowSize = window.getSize();
+    float windowWidth = static_cast<float>(windowSize.x);
+    float windowHeight = static_cast<float>(windowSize.y);
+
+    // Panel positioning (top-left corner)
+    float panelX = 10.0f;
+    float panelY = 10.0f;
+    float panelWidth = 300.0f;
+    float panelHeight = 280.0f;
+
+    // Draw panel background
+    sf::RectangleShape panel({panelWidth, panelHeight});
+    panel.setPosition({panelX, panelY});
+    panel.setFillColor(sf::Color(0, 0, 0, 200));  // Semi-transparent black
+    panel.setOutlineColor(sf::Color(100, 150, 200, 200));
+    panel.setOutlineThickness(2);
+    window.draw(panel);
+
+    // Get player stats
+    const auto& stats = player->getStats();
+    const auto& inventory = player->getInventory();
+
+    // Create text elements for stats
+    float currentY = panelY + 10.0f;
+    float lineHeight = 20.0f;
+
+    // Player name
+    sf::Text playerName(font);
+    playerName.setCharacterSize(18);
+    playerName.setFillColor(sf::Color(255, 215, 0));  // Gold
+    playerName.setStyle(sf::Text::Bold);
+    playerName.setString(stats.getName());
+    playerName.setPosition({panelX + 10.0f, currentY});
+    window.draw(playerName);
+    currentY += lineHeight + 5.0f;
+
+    // Health bar
+    sf::Text healthLabel(font);
+    healthLabel.setCharacterSize(14);
+    healthLabel.setFillColor(sf::Color::White);
+    healthLabel.setString("Health: " + to_string(stats.getCurrentHealth()) + "/" + to_string(stats.getMaxHealth()));
+    healthLabel.setPosition({panelX + 10.0f, currentY});
+    window.draw(healthLabel);
+
+    // Health bar visual
+    float barWidth = panelWidth - 20.0f;
+    float healthPercent = static_cast<float>(stats.getCurrentHealth()) / stats.getMaxHealth();
+    sf::RectangleShape healthBarBg({barWidth, 8.0f});
+    healthBarBg.setPosition({panelX + 10.0f, currentY + lineHeight + 2.0f});
+    healthBarBg.setFillColor(sf::Color(50, 50, 50));
+    window.draw(healthBarBg);
+
+    sf::RectangleShape healthBar({barWidth * healthPercent, 8.0f});
+    healthBar.setPosition({panelX + 10.0f, currentY + lineHeight + 2.0f});
+    healthBar.setFillColor(sf::Color(200, 50, 50));  // Red for health
+    window.draw(healthBar);
+    currentY += lineHeight + 12.0f;
+
+    // Mana bar
+    sf::Text manaLabel(font);
+    manaLabel.setCharacterSize(14);
+    manaLabel.setFillColor(sf::Color::White);
+    manaLabel.setString("Mana: " + to_string(stats.getCurrentMana()) + "/" + to_string(stats.getMaxMana()));
+    manaLabel.setPosition({panelX + 10.0f, currentY});
+    window.draw(manaLabel);
+
+    // Mana bar visual
+    float manaPercent = static_cast<float>(stats.getCurrentMana()) / stats.getMaxMana();
+    sf::RectangleShape manaBarBg({barWidth, 8.0f});
+    manaBarBg.setPosition({panelX + 10.0f, currentY + lineHeight + 2.0f});
+    manaBarBg.setFillColor(sf::Color(50, 50, 50));
+    window.draw(manaBarBg);
+
+    sf::RectangleShape manaBar({barWidth * manaPercent, 8.0f});
+    manaBar.setPosition({panelX + 10.0f, currentY + lineHeight + 2.0f});
+    manaBar.setFillColor(sf::Color(50, 100, 200));  // Blue for mana
+    window.draw(manaBar);
+    currentY += lineHeight + 12.0f;
+
+    // Stats display
+    sf::Text statsLabel(font);
+    statsLabel.setCharacterSize(12);
+    statsLabel.setFillColor(sf::Color(180, 180, 180));
+    statsLabel.setString("LVL: " + to_string(stats.getLevel()) + " | XP: " + to_string(stats.getExperience()));
+    statsLabel.setPosition({panelX + 10.0f, currentY});
+    window.draw(statsLabel);
+    currentY += lineHeight;
+
+    // Combat stats (smaller text)
+    sf::Text combatStats(font);
+    combatStats.setCharacterSize(12);
+    combatStats.setFillColor(sf::Color(150, 150, 150));
+    combatStats.setString("STR: " + to_string(stats.getStrength()) + " | DEF: " + to_string(stats.getDefense()) +
+                         "\nINT: " + to_string(stats.getIntelligence()) + " | AGI: " + to_string(stats.getAgility()));
+    combatStats.setPosition({panelX + 10.0f, currentY});
+    window.draw(combatStats);
+    currentY += lineHeight * 2.2f;
+
+    // Gold and inventory capacity
+    sf::Text goldText(font);
+    goldText.setCharacterSize(13);
+    goldText.setFillColor(sf::Color(255, 215, 0));  // Gold color
+    goldText.setString("Gold: " + to_string(inventory.getGold()));
+    goldText.setPosition({panelX + 10.0f, currentY});
+    window.draw(goldText);
+    currentY += lineHeight;
+
+    sf::Text inventoryText(font);
+    inventoryText.setCharacterSize(12);
+    inventoryText.setFillColor(sf::Color(150, 150, 150));
+    inventoryText.setString("Items: " + to_string(inventory.getItemCount()) + " | Weight: " +
+                           to_string(inventory.getCurrentWeight()) + "/" + to_string(inventory.getMaxWeight()));
+    inventoryText.setPosition({panelX + 10.0f, currentY});
+    window.draw(inventoryText);
+}
+
+void DialogueVisitor::drawInventoryPanel() {
+    if (!player) return;
+
+    sf::Vector2u windowSize = window.getSize();
+    float windowWidth = static_cast<float>(windowSize.x);
+    float windowHeight = static_cast<float>(windowSize.y);
+
+    // Panel positioning (top-right corner, below stats if displayed)
+    float panelX = windowWidth - 350.0f;
+    float panelY = 10.0f;
+    float panelWidth = 340.0f;
+    float panelHeight = 500.0f;
+
+    // Draw panel background
+    sf::RectangleShape panel({panelWidth, panelHeight});
+    panel.setPosition({panelX, panelY});
+    panel.setFillColor(sf::Color(0, 0, 0, 220));  // Semi-transparent black
+    panel.setOutlineColor(sf::Color(150, 100, 200, 200));  // Purple outline for inventory
+    panel.setOutlineThickness(2);
+    window.draw(panel);
+
+    // Title
+    sf::Text inventoryTitle(font);
+    inventoryTitle.setCharacterSize(18);
+    inventoryTitle.setFillColor(sf::Color(200, 150, 255));  // Purple
+    inventoryTitle.setStyle(sf::Text::Bold);
+    inventoryTitle.setString("INVENTORY (Press I to close)");
+    inventoryTitle.setPosition({panelX + 10.0f, panelY + 10.0f});
+    window.draw(inventoryTitle);
+
+    float currentY = panelY + 35.0f;
+    float lineHeight = 18.0f;
+    int maxItemsVisible = 22; // Approximate items that fit in the panel
+
+    const auto& inventory = player->getInventory();
+    int itemCount = inventory.getItemCount();
+
+    if (itemCount == 0) {
+        sf::Text emptyText(font);
+        emptyText.setCharacterSize(14);
+        emptyText.setFillColor(sf::Color(150, 150, 150));
+        emptyText.setString("No items yet");
+        emptyText.setPosition({panelX + 15.0f, currentY + 50.0f});
+        window.draw(emptyText);
+    } else {
+        // Draw each item using iterator
+        auto& itemsList = const_cast<List<Item>&>(inventory.getItems());
+        auto it = itemsList.getIterator();
+        auto endIt = it.end();
+        int itemsDrawn = 0;
+
+        while (it != endIt && itemsDrawn < maxItemsVisible) {
+            const Item& item = it.getCurrent()->getValue();
+
+            sf::Text itemText(font);
+            itemText.setCharacterSize(13);
+            itemText.setFillColor(sf::Color::White);
+
+            // Format: [Type] Name - Value gold
+            string typeStr = "";
+            switch (item.type) {
+                case ItemType::WEAPON: typeStr = "[W] "; break;
+                case ItemType::ARMOR: typeStr = "[A] "; break;
+                case ItemType::POTION: typeStr = "[P] "; break;
+                case ItemType::CONSUMABLE: typeStr = "[C] "; break;
+                case ItemType::QUEST_ITEM: typeStr = "[Q] "; break;
+                default: typeStr = "[*] "; break;
+            }
+
+            string displayText = typeStr + item.name;
+            if (displayText.length() > 40) {
+                displayText = displayText.substr(0, 37) + "...";
+            }
+
+            itemText.setString(displayText);
+            itemText.setPosition({panelX + 10.0f, currentY});
+            window.draw(itemText);
+
+            // Draw value on the right side
+            sf::Text valueText(font);
+            valueText.setCharacterSize(12);
+            valueText.setFillColor(sf::Color(255, 215, 0));  // Gold color
+            valueText.setString(to_string(item.value));
+            valueText.setPosition({panelX + panelWidth - 50.0f, currentY});
+            window.draw(valueText);
+
+            currentY += lineHeight;
+            itemsDrawn++;
+            ++it;
+        }
+    }
+
+    // Show scroll hint if there are more items
+    if (itemCount > maxItemsVisible) {
+        sf::Text scrollHint(font);
+        scrollHint.setCharacterSize(11);
+        scrollHint.setFillColor(sf::Color(150, 150, 150));
+        scrollHint.setString("... and " + to_string(itemCount - maxItemsVisible) + " more");
+        scrollHint.setPosition({panelX + 10.0f, currentY});
+        window.draw(scrollHint);
+    }
+
+    // Draw footer with weight info
+    sf::Text weightInfo(font);
+    weightInfo.setCharacterSize(12);
+    weightInfo.setFillColor(sf::Color(180, 180, 180));
+    weightInfo.setString("Weight: " + to_string(inventory.getCurrentWeight()) + "/" + to_string(inventory.getMaxWeight()));
+    weightInfo.setPosition({panelX + 10.0f, panelY + panelHeight - 25.0f});
+    window.draw(weightInfo);
 }
 
 void DialogueVisitor::skipToEnd() {

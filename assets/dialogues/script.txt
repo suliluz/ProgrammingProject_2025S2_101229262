@@ -216,3 +216,4 @@ CHOICE:Awaken. | target:end_dialogue
 
 NODE:end_dialogue
 MSG:The oppressive weight lifts. You open your eyes. The journey has ended, but the work—the rebuilding of the true self—has just begun.
+

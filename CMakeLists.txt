@@ -55,4 +55,7 @@ add_executable(test_stack_queue test_stack_queue.cpp)
 # Copy assets directory to the build directory
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
+# Define asset path constant for code to use - use relative path for portability
+add_compile_definitions(ASSETS_PATH="assets/")
+
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SFML_LIBS})

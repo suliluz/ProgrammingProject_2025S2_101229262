@@ -6,6 +6,7 @@
 #include "game/Player.h"
 #include "game/Settings.h"
 #include "states/GameState.h"
+#include "AssetPaths.h"
 
 using namespace std;
 

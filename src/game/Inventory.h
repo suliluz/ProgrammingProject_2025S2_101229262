@@ -95,6 +95,11 @@ public:
         return maxWeight;
     }
 
+    // Allow non-const access to items for iteration
+    auto getIterator() {
+        return items.getIterator();
+    }
+
     void displayInventory() const {
         cout << "\n=== INVENTORY ===" << endl;
         cout << "Gold: " << gold << endl;

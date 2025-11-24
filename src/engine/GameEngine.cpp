@@ -1,10 +1,11 @@
 #include "GameEngine.h"
 #include <iostream>
 #include "states/GameState.h"
+#include "AssetPaths.h"
 
 using namespace std;
 
-GameEngine::GameEngine() : currentState(nullptr), pendingState(nullptr), player("Hero"), dialogueGraph(nullptr) {
+GameEngine::GameEngine() : currentState(nullptr), pendingState(nullptr), player("Player"), dialogueGraph(nullptr) {
     // Load settings
     settings.load();
 
@@ -13,9 +14,9 @@ GameEngine::GameEngine() : currentState(nullptr), pendingState(nullptr), player(
     settings.getWindowDimensions(width, height);
 
     if (settings.getWindowSize() == WindowSize::FULLSCREEN) {
-        window.create(sf::VideoMode::getDesktopMode(), "RPG Game", sf::State::Fullscreen);
+        window.create(sf::VideoMode::getDesktopMode(), "Dialogue Game", sf::State::Fullscreen);
     } else {
-        window.create(sf::VideoMode({width, height}), "RPG Game");
+        window.create(sf::VideoMode({width, height}), "Dialogue Game");
     }
 
     // Initialize player with starting stats
@@ -30,12 +31,8 @@ void GameEngine::loadDialogues() {
     dialogueGraph = new DialogueGraph(player);
 
     // Load dialogue files
-    if (dialogueGraph->loadFromFile("assets/dialogues/awakening.txt")) {
-        dialogueGraph->loadAdditionalFile("assets/dialogues/crossroads.txt");
-        dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_vanity.txt");
-        dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_industry.txt");
-        dialogueGraph->loadAdditionalFile("assets/dialogues/path_of_predation.txt");
-        dialogueGraph->loadAdditionalFile("assets/dialogues/ending.txt");
+    string scriptPath = string(ASSETS_PATH) + "dialogues/script.txt";
+    if (dialogueGraph->loadFromFile(scriptPath)) {
         cout << "Dialogues loaded successfully!" << endl;
 
     } else {
@@ -56,7 +53,6 @@ void GameEngine::run() {
     while (window.isOpen()) {
         sf::Time deltaTime = clock.restart();
 
-        // Apply pending state change at the start of the frame
         if (pendingState) {
             currentState = move(pendingState);
             pendingState = nullptr;

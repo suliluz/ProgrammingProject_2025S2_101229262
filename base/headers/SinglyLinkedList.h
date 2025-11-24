@@ -14,15 +14,12 @@ private:
     int count;
 
 public:
-    // Constructor
     SinglyLinkedList() : head(&Node::NIL), tail(&Node::NIL), count(0) {}
 
-    // Destructor
     ~SinglyLinkedList() {
         clear();
     }
 
-    // Copy constructor
     SinglyLinkedList(const SinglyLinkedList& other) : head(&Node::NIL), tail(&Node::NIL), count(0) {
         Node* current = other.head;
         while (current != &Node::NIL) {
@@ -31,7 +28,6 @@ public:
         }
     }
 
-    // Copy assignment
     SinglyLinkedList& operator=(const SinglyLinkedList& other) {
         if (this != &other) {
             clear();
@@ -44,7 +40,6 @@ public:
         return *this;
     }
 
-    // Push to back (for Queue enqueue and general use)
     void push(const T& value) {
         Node* newNode = new Node(value);
         newNode->setNext(&Node::NIL);
@@ -59,7 +54,6 @@ public:
         count++;
     }
 
-    // Push to front (for Stack push - O(1))
     void pushFront(const T& value) {
         Node* newNode = new Node(value);
         newNode->setNext(head);
@@ -71,7 +65,6 @@ public:
         count++;
     }
 
-    // Pop from front (for Stack pop and Queue dequeue - O(1))
     T popFront() {
         if (isEmpty()) {
             throw runtime_error("Cannot pop from empty SinglyLinkedList");
@@ -90,7 +83,6 @@ public:
         return value;
     }
 
-    // Get first element (const)
     const T& getFirst() const {
         if (isEmpty()) {
             throw runtime_error("List is empty");
@@ -98,7 +90,6 @@ public:
         return head->getValue();
     }
 
-    // Get last element (const)
     const T& getLast() const {
         if (isEmpty()) {
             throw runtime_error("List is empty");
@@ -106,36 +97,30 @@ public:
         return tail->getValue();
     }
 
-    // Check if empty
     [[nodiscard]]
     bool isEmpty() const {
         return head == &Node::NIL;
     }
 
-    // Get size
     [[nodiscard]]
     int length() const {
         return count;
     }
 
-    // Clear all elements
     void clear() {
         while (!isEmpty()) {
             popFront();
         }
     }
 
-    // Get iterator
     ForwardIterator<T> getIterator() {
         return ForwardIterator<T>(head);
     }
 
-    // Get const iterator
     ForwardIterator<T> getIterator() const {
         return ForwardIterator<T>(head);
     }
 
-    // Find element by value (returns true if found)
     bool contains(const T& value) const {
         Node* current = head;
         while (current != &Node::NIL) {
@@ -147,7 +132,6 @@ public:
         return false;
     }
 
-    // Remove first occurrence of value
     bool remove(const T& value) {
         if (isEmpty()) {
             return false;

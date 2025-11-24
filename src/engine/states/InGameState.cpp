@@ -71,6 +71,7 @@ InGameState::InGameState(GameEngine& game)
 
     // Apply text speed from settings
     dialogueVisitor.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
+    dialogueVisitor.setPlayer(&game.getPlayer());
 
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
@@ -103,7 +104,6 @@ InGameState::InGameState(GameEngine& game)
     cout << "InGameState constructor end" << endl;
 }
 
-// Constructor for loading from saved node
 InGameState::InGameState(GameEngine& game, const string& startNodeId)
     : GameState(game),
       dialogueVisitor(game.getWindow()),
@@ -114,9 +114,7 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
       saveButtonText(uiFont),
       loadButtonText(uiFont),
       exitButtonText(uiFont) {
-    cout << "InGameState loading from node: " << startNodeId << endl;
 
-    // Load UI font and initialize buttons (same as above)
     if (!uiFont.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading UI font" << endl;
     }
@@ -157,8 +155,8 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
     exitButtonText.setFillColor(sf::Color::White);
     exitButtonText.setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
 
-    // Apply text speed from settings
     dialogueVisitor.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
+    dialogueVisitor.setPlayer(&game.getPlayer());
 
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
@@ -174,20 +172,25 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
         auto* rootNode = dialogueGraph->buildTree();
         if (rootNode) {
             game.getPlayer().displayStatus();
-            // Load from specified node
-            auto* loadNode = dialogueGraph->getNode(startNodeId);
-            if (loadNode && !loadNode->isEmpty()) {
-                currentDialogueNode = loadNode;
+            if (startNodeId == "root") {
+                currentDialogueNode = rootNode;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
             } else {
-                cerr << "Failed to find node: " << startNodeId << endl;
+                auto* loadNode = dialogueGraph->getNode(startNodeId);
+                if (loadNode && !loadNode->isEmpty()) {
+                    currentDialogueNode = loadNode;
+                    currentDialogueNode->getKey().accept(dialogueVisitor);
+                } else {
+                    cerr << "Failed to find node: " << startNodeId << " - Falling back to root" << endl;
+                    currentDialogueNode = rootNode;
+                    currentDialogueNode->getKey().accept(dialogueVisitor);
+                }
             }
         }
     }
 }
 
 void InGameState::handleInput() {
-    cout << "InGameState handleInput start" << endl;
     while (const auto event = game.getWindow().pollEvent()) {
         cout << "Event polled" << endl;
         if (event->is<sf::Event::Closed>()) {
@@ -224,13 +227,9 @@ void InGameState::handleInput() {
             dialogueVisitor.handleInput(*event);
         }
     }
-    cout << "InGameState handleInput end" << endl;
 }
 
 void InGameState::update(float dt) {
-    cout << "InGameState update start" << endl;
-
-    // Update hover state for buttons
     sf::Vector2i mousePos = sf::Mouse::getPosition(game.getWindow());
     hoveredButton = -1;
 
@@ -245,19 +244,15 @@ void InGameState::update(float dt) {
     if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
         dialogueVisitor.update(sf::seconds(dt));
     }
-    cout << "InGameState update end" << endl;
 }
 
 void InGameState::render(sf::RenderWindow& window) {
-    cout << "InGameState render start" << endl;
     if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
         dialogueVisitor.render();
     }
 
     // Draw UI buttons
     drawUIButtons();
-
-    cout << "InGameState render end" << endl;
 }
 
 void InGameState::saveGame() {

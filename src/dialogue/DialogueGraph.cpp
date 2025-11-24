@@ -6,16 +6,17 @@
 
 using namespace std;
 
-DialogueGraph::Action::Action() : type(END_DIALOGUE), stringParam(""), intParam(0) {}
+DialogueGraph::Action::Action() : type(END_DIALOGUE), intParam(0) {}
 
-DialogueGraph::Action::Action(Type t, int val) : type(t), stringParam(""), intParam(val) {}
+DialogueGraph::Action::Action(Type t, int val) : type(t), intParam(val) {}
 
-DialogueGraph::Action::Action(Type t, const string& str, int val)
-    : type(t), stringParam(str), intParam(val) {}
+DialogueGraph::Action::Action(Type t, string str, int val)
+    : type(t), stringParam(std::move(str)), intParam(val) {}
 
-DialogueGraph::ChoiceInfo::ChoiceInfo() : text(""), targetNodeId(""), condition("") {}
+DialogueGraph::ChoiceInfo::ChoiceInfo() : actions(), condition(List<string>{})
+{}
 
-DialogueGraph::NodeInfo::NodeInfo() : nodeId(""), message("") {}
+DialogueGraph::NodeInfo::NodeInfo() = default;
 
 DialogueGraph::DialogueGraph(Player& player) : rootNodeId("root"), playerRef(&player), rootTree(nullptr) {}
 
@@ -50,7 +51,7 @@ DialogueGraph::~DialogueGraph() {
 }
 
 void DialogueGraph::setDialogueStartCallback(function<void(NTree<Dialogue, MAX_CHOICES>*)> callback) {
-    onDialogueStart = callback;
+    onDialogueStart = std::move(callback);
 }
 
 bool DialogueGraph::loadFromFile(const string& filename) {
@@ -68,7 +69,11 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildTree() {
 
 NTree<Dialogue, MAX_CHOICES>* DialogueGraph::getNode(const string& nodeId) {
     auto* result = builtNodes.search(nodeId);
-    return result ? *result : nullptr;
+    if (result) {
+        return *result;
+    }
+    // If not built yet, build it on demand (needed for loading saved games)
+    return buildNode(nodeId);
 }
 
 bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
@@ -150,13 +155,11 @@ bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
 }
 
 NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
-    // Check if already built
     auto* existing = builtNodes.search(nodeId);
     if (existing) {
         return *existing;
     }
 
-    // Get node data
     NodeInfo* data = nullptr;
     auto fileIt = allFiles.getIterator();
     auto endFileIt = fileIt.end();
@@ -177,30 +180,25 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
         return nullptr;
     }
 
-    // Create dialogue
     Dialogue dialogue;
     dialogue.speaker = data->speaker;
     dialogue.message = data->message;
 
     auto* node = new NTree<Dialogue, MAX_CHOICES>(dialogue);
     builtNodes.insert(nodeId, node);
-    allTreeNodes.push(node);  // Track for cleanup
+    allTreeNodes.push(node);
 
-    // Build choices
     auto choiceIt = data->choices.getIterator();
     auto endIt = choiceIt.end();
 
     while (choiceIt != endIt) {
         ChoiceInfo& choiceInfo = choiceIt.getCurrent()->getValue();
 
-        // Build target node (recursive) - but DON'T attach it
-        // Dialogue graphs can have shared nodes, so we can't use tree structure
         NTree<Dialogue, MAX_CHOICES>* targetNode = nullptr;
         if (!choiceInfo.targetNodeId.empty()) {
             targetNode = buildNode(choiceInfo.targetNodeId);
         }
 
-        // Create choice with actions - navigation handled by action callback
         Choice choice;
         choice.text = choiceInfo.text;
         choice.action = createAction(choiceInfo, targetNode);
@@ -212,18 +210,20 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
 
     return node;
 }
+}
 
 function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree<Dialogue, MAX_CHOICES>* targetNode) {
     return [this, choiceInfo, targetNode]() {
-        // Check condition
-        if (!choiceInfo.condition.empty()) {
-            if (!evaluateCondition(choiceInfo.condition)) {
-                cout << "Condition not met: " << choiceInfo.condition << endl;
+        auto condIt = const_cast<List<string>&>(choiceInfo.condition).getIterator();
+        auto condEnd = const_cast<List<string>&>(choiceInfo.condition).getIterator().end();
+        while (condIt != condEnd) {
+            if (!evaluateCondition(condIt.getCurrent()->getValue())) {
+                cout << "Condition not met: " << condIt.getCurrent()->getValue() << endl;
                 return;
             }
+            ++condIt;
         }
 
-        // Execute actions
         auto actionIt = const_cast<List<Action>&>(choiceInfo.actions).getIterator();
         auto endIt = actionIt.end();
 
@@ -233,7 +233,6 @@ function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree
             ++actionIt;
         }
 
-        // Navigate to target node
         if (targetNode && onDialogueStart) {
             onDialogueStart(targetNode);
         }
@@ -293,6 +292,10 @@ bool DialogueGraph::evaluateCondition(const string& condition) {
         int required = stoi(condition.substr(7));
         return playerRef->getStats().getLevel() >= required;
     }
+    else if (condition.rfind("mana>=", 0) == 0) {
+        int required = stoi(condition.substr(6));
+        return playerRef->getStats().getCurrentMana() >= required;
+    }
     else if (condition.rfind("hasitem:", 0) == 0) {
         string itemName = condition.substr(8);
         return playerRef->getInventory().hasItem(itemName);
@@ -302,9 +305,6 @@ bool DialogueGraph::evaluateCondition(const string& condition) {
 }
 
 Item DialogueGraph::createItemFromString(const string& itemStr) {
-    // Parse format: "ItemName:ItemType:bonus"
-    // e.g., "Health Potion:POTION:50" or "Iron Sword:WEAPON:5"
-
     List<string> parts = split(itemStr, ':');
 
     string name = "Unknown";
@@ -334,7 +334,6 @@ Item DialogueGraph::createItemFromString(const string& itemStr) {
 
     Item item(name, type, bonus);
 
-    // Set appropriate bonuses based on type
     if (type == ItemType::WEAPON) {
         item.attackBonus = bonus;
     }
@@ -358,7 +357,6 @@ ItemType DialogueGraph::stringToItemType(const string& typeStr) {
 }
 
 DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
-    // Format: "Choice text | target:node_id | gold:20 | item:ItemName:Type:bonus | xp:10 | condition:gold>=30"
     ChoiceInfo info;
 
     List<string> parts = split(choiceLine, '|');
@@ -392,8 +390,12 @@ DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
             int amount = stoi(part.substr(7));
             info.actions.push(Action(Action::HEALTH, amount));
         }
+        else if (part.rfind("mana:", 0) == 0) {
+            int amount = stoi(part.substr(5));
+            info.actions.push(Action(Action::MANA, amount));
+        }
         else if (part.rfind("condition:", 0) == 0) {
-            info.condition = trim(part.substr(10));
+            info.condition.push(trim(part.substr(10)));
         }
 
         ++it;

@@ -10,15 +10,12 @@ bool SaveSystem::saveGame(const Player& player, const string& currentNodeId, con
         return false;
     }
 
-    // Save timestamp
     time_t now = time(nullptr);
     writeTime(file, now);
 
-    // Save player data
     const auto& stats = player.getStats();
     writeString(file, stats.getName());
 
-    // Save stats
     writeInt(file, stats.getHP());
     writeInt(file, stats.getMaxHP());
     writeInt(file, stats.getMP());
@@ -30,11 +27,9 @@ bool SaveSystem::saveGame(const Player& player, const string& currentNodeId, con
     writeInt(file, stats.getLevel());
     writeInt(file, stats.getExperience());
 
-    // Save inventory
     const auto& inventory = player.getInventory();
     writeInt(file, inventory.getGold());
 
-    // Save current dialogue node
     writeString(file, currentNodeId);
 
     file.close();
@@ -49,13 +44,10 @@ bool SaveSystem::loadGame(Player& player, string& currentNodeId, const string& f
         return false;
     }
 
-    // Read timestamp (but don't use it)
     readTime(file);
 
-    // Load player name (we don't need it, but read it anyway to advance file position)
     string savedName = readString(file);
 
-    // Load stats
     int hp = readInt(file);
     int maxHP = readInt(file);
     int mp = readInt(file);
@@ -67,7 +59,6 @@ bool SaveSystem::loadGame(Player& player, string& currentNodeId, const string& f
     int level = readInt(file);
     int exp = readInt(file);
 
-    // Apply stats to player
     player.getStats().setHP(hp);
     player.getStats().setMaxHP(maxHP);
     player.getStats().setMP(mp);
@@ -79,11 +70,9 @@ bool SaveSystem::loadGame(Player& player, string& currentNodeId, const string& f
     player.getStats().setLevel(level);
     player.getStats().setExperience(exp);
 
-    // Load gold
     int gold = readInt(file);
     player.getInventory().setGold(gold);
 
-    // Load current node
     currentNodeId = readString(file);
 
     file.close();

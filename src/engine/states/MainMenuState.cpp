@@ -6,11 +6,13 @@
 #include "SettingsState.h"
 #include "game/SaveSystem.h"
 #include <SFML/Window/Event.hpp>
+#include "AssetPaths.h"
 
 using namespace std;
 
 MainMenuState::MainMenuState(GameEngine& game) : GameState(game), title(nullptr), selectedItemIndex(0) {
-    if (!font.openFromFile("assets/arial.ttf")) {
+    string fontPath = string(ASSETS_PATH) + "arial.ttf";
+    if (!font.openFromFile(fontPath)) {
         cerr << "Failed to load font!" << endl;
     }
 
@@ -32,10 +34,6 @@ MainMenuState::MainMenuState(GameEngine& game) : GameState(game), title(nullptr)
 }
 
 MainMenuState::~MainMenuState() {
-    //delete title;
-    //for (auto& item : menuItems) {
-    //    delete item;
-    //}
 }
 
 
@@ -52,24 +50,19 @@ void MainMenuState::handleInput() {
                 moveDown();
             } else if (keyPressed->code == sf::Keyboard::Key::Enter) {
                 switch (selectedItemIndex) {
-                    case 0: // New Game
-                        cout << "Creating InGameState..." << endl;
+                    case 0:
                         game.changeState(make_unique<InGameState>(game));
-                        cout << "InGameState created and set" << endl;
                         break;
-                    case 1: // Load Game
-                        cout << "Opening Load Game menu..." << endl;
+                    case 1:
                         game.changeState(make_unique<LoadGameState>(game, true));
                         break;
-                    case 2: // Settings
-                        cout << "Opening Settings..." << endl;
+                    case 2:
                         game.changeState(make_unique<SettingsState>(game));
                         break;
-                    case 3: // Exit
+                    case 3:
                         game.getWindow().close();
                         break;
                 }
-                cout << "After switch statement" << endl;
             }
         }
     }

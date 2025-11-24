@@ -11,10 +11,8 @@ selectedChoice(0),
 currentDialogue(nullptr),
 text(nullptr) {
     if (!font.openFromFile("assets/arial.ttf")) {
-        // In a real game, you'd have better error handling
         cerr << "Error loading font" << endl;
     }
-    // Create text after font is loaded
     text = new sf::Text(font);
     text->setCharacterSize(24);
     text->setFillColor(sf::Color::White);
