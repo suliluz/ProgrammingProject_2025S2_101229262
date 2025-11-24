@@ -7,9 +7,11 @@
 #include "game/SaveSystem.h"
 #include <SFML/Window/Event.hpp>
 
+using namespace std;
+
 MainMenuState::MainMenuState(GameEngine& game) : GameState(game), title(nullptr), selectedItemIndex(0) {
     if (!font.openFromFile("assets/arial.ttf")) {
-        std::cerr << "Failed to load font!" << std::endl;
+        cerr << "Failed to load font!" << endl;
     }
 
     title = new sf::Text(font);
@@ -18,7 +20,7 @@ MainMenuState::MainMenuState(GameEngine& game) : GameState(game), title(nullptr)
     title->setFillColor(sf::Color::White);
     title->setPosition({300, 100});
 
-    std::vector<std::string> items = {"New Game", "Load Game", "Settings", "Exit"};
+    vector<string> items = {"New Game", "Load Game", "Settings", "Exit"};
     for (int i = 0; i < items.size(); ++i) {
         sf::Text* text = new sf::Text(font, items[i], 30);
         text->setFillColor(sf::Color::White);
@@ -38,7 +40,6 @@ MainMenuState::~MainMenuState() {
 
 
 void MainMenuState::handleInput() {
-    std::cout << "MainMenuState handleInput start" << std::endl;
     while (const auto event = game.getWindow().pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
             game.getWindow().close();
@@ -52,27 +53,26 @@ void MainMenuState::handleInput() {
             } else if (keyPressed->code == sf::Keyboard::Key::Enter) {
                 switch (selectedItemIndex) {
                     case 0: // New Game
-                        std::cout << "Creating InGameState..." << std::endl;
-                        game.changeState(std::make_unique<InGameState>(game));
-                        std::cout << "InGameState created and set" << std::endl;
+                        cout << "Creating InGameState..." << endl;
+                        game.changeState(make_unique<InGameState>(game));
+                        cout << "InGameState created and set" << endl;
                         break;
                     case 1: // Load Game
-                        std::cout << "Opening Load Game menu..." << std::endl;
-                        game.changeState(std::make_unique<LoadGameState>(game, true));
+                        cout << "Opening Load Game menu..." << endl;
+                        game.changeState(make_unique<LoadGameState>(game, true));
                         break;
                     case 2: // Settings
-                        std::cout << "Opening Settings..." << std::endl;
-                        game.changeState(std::make_unique<SettingsState>(game));
+                        cout << "Opening Settings..." << endl;
+                        game.changeState(make_unique<SettingsState>(game));
                         break;
                     case 3: // Exit
                         game.getWindow().close();
                         break;
                 }
-                std::cout << "After switch statement" << std::endl;
+                cout << "After switch statement" << endl;
             }
         }
     }
-    std::cout << "MainMenuState handleInput end" << std::endl;
 }
 
 void MainMenuState::update(float dt) {

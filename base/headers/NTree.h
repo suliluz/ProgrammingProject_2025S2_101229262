@@ -1,5 +1,8 @@
 #pragma once
 #include <stdexcept>
+#include <iostream>
+
+using namespace std;
 
 template<class T, int N>
 class NTree
@@ -52,7 +55,7 @@ public:
     // Gets the key value stored in this node
     const T& getKey() const {
         if (isEmpty()) {
-            throw std::logic_error("Cannot get key from NIL node");
+            throw logic_error("Cannot get key from NIL node");
         }
         return key;
     }
@@ -60,7 +63,7 @@ public:
     // Non-const overload to allow modification of the key
     T& getKey() {
         if (isEmpty()) {
-            throw std::logic_error("Cannot get key from NIL node");
+            throw logic_error("Cannot get key from NIL node");
         }
         return key;
     }
@@ -68,7 +71,7 @@ public:
     // Non-const overload to get a child node at an index
     NTree<T, N>& operator[](int index) {
         if (index < 0 || index >= N) {
-            throw std::out_of_range("NTree index out of bounds");
+            throw out_of_range("NTree index out of bounds");
         }
         return *(nodes[index]);
     }
@@ -76,7 +79,7 @@ public:
     // Const overload returns a const reference
     const NTree<T, N>& operator[](int index) const {
         if (index < 0 || index >= N) {
-            throw std::out_of_range("NTree index out of bounds");
+            throw out_of_range("NTree index out of bounds");
         }
         return *(nodes[index]);
     }
@@ -84,10 +87,10 @@ public:
     // Attach a subtree to this node at a specific index
     void attachNTree(int index, NTree<T, N>* tree) {
         if (isEmpty()) {
-            throw std::logic_error("Cannot attach to NIL node");
+            throw logic_error("Cannot attach to NIL node");
         }
         if (index < 0 || index >= N) {
-            throw std::out_of_range("NTree index out of bounds");
+            throw out_of_range("NTree index out of bounds");
         }
 
         if (nodes[index] != &NIL) {
@@ -101,10 +104,10 @@ public:
     // Detach and return the subtree rooted at a specific index
     NTree<T, N>* detachNTree(int index) {
         if (isEmpty()) {
-            throw std::logic_error("Cannot detach from NIL node");
+            throw logic_error("Cannot detach from NIL node");
         }
         if (index < 0 || index >= N) {
-            throw std::out_of_range("NTree index out of bounds");
+            throw out_of_range("NTree index out of bounds");
         }
 
         NTree<T, N>* detachedTree = nodes[index];

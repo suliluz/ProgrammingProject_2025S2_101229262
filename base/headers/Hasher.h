@@ -1,5 +1,6 @@
 #pragma once
-#include <cstddef> // For size_t
+
+using namespace std;
 
 // Default hasher template
 template <class K>
@@ -36,11 +37,11 @@ struct Hasher<int> {
     }
 };
 
-// Template specialization for std::string
+// Template specialization for string
 #include <string>
 template <>
-struct Hasher<std::string> {
-    static size_t hash(const std::string& str) {
+struct Hasher<string> {
+    static size_t hash(const string& str) {
         unsigned long hash = 5381;
         for (char c : str) {
             hash = ((hash << 5) + hash) + c; // hash * 33 + c

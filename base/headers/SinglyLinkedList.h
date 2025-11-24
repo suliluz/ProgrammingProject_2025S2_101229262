@@ -2,6 +2,8 @@
 #include "SinglyLinkedNode.h"
 #include "ForwardIterator.h"
 
+using namespace std;
+
 template <class T>
 class SinglyLinkedList {
 private:
@@ -72,7 +74,7 @@ public:
     // Pop from front (for Stack pop and Queue dequeue - O(1))
     T popFront() {
         if (isEmpty()) {
-            throw std::runtime_error("Cannot pop from empty SinglyLinkedList");
+            throw runtime_error("Cannot pop from empty SinglyLinkedList");
         }
 
         Node* oldHead = head;
@@ -91,7 +93,7 @@ public:
     // Get first element (const)
     const T& getFirst() const {
         if (isEmpty()) {
-            throw std::runtime_error("List is empty");
+            throw runtime_error("List is empty");
         }
         return head->getValue();
     }
@@ -99,7 +101,7 @@ public:
     // Get last element (const)
     const T& getLast() const {
         if (isEmpty()) {
-            throw std::runtime_error("List is empty");
+            throw runtime_error("List is empty");
         }
         return tail->getValue();
     }

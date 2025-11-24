@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace std;
+
 template <class T>
 class DoublyLinkedNode {
 private:
@@ -76,6 +78,6 @@ public:
 template <class T>
 DoublyLinkedNode<T> DoublyLinkedNode<T>::NIL = [] {
     DoublyLinkedNode nil_node;
-    // The default constructor for std::optional makes `value` empty (std::nullopt), which is what we want for a sentinel.
+    // The default constructor for optional makes `value` empty (nullopt), which is what we want for a sentinel.
     return nil_node;
 }();

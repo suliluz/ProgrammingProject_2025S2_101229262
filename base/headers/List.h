@@ -4,6 +4,8 @@
 #include "DoublyLinkedNode.h"
 #include "BidirectionalIterator.h"
 
+using namespace std;
+
 template <class T>
 class List {
     typedef DoublyLinkedNode<T> Node;
@@ -24,7 +26,7 @@ public:
     List(): head(&Node::NIL), tail(&Node::NIL), count(0) {}
 
     // Initializer-list constructor
-    List(std::initializer_list<T> ilist): head(&Node::NIL), tail(&Node::NIL), count(0) {
+    List(initializer_list<T> ilist): head(&Node::NIL), tail(&Node::NIL), count(0) {
         for (const T& value : ilist) {
             push(value);
         }
@@ -108,7 +110,7 @@ public:
 
     T shift() {
         if (isEmpty()) {
-            throw std::out_of_range("List is empty.");
+            throw out_of_range("List is empty.");
         }
 
         Node* toDelete = head;
@@ -130,7 +132,7 @@ public:
 
     T pop() {
         if (isEmpty()) {
-            throw std::out_of_range("List is empty.");
+            throw out_of_range("List is empty.");
         }
 
         Node* toDelete = tail;
@@ -152,7 +154,7 @@ public:
 
     void insertAt(const int index, const T value) {
         if (index < 0 || index > count) {
-            throw std::out_of_range("Index out of range.");
+            throw out_of_range("Index out of range.");
         }
 
         if (index == 0) {
@@ -198,7 +200,7 @@ public:
 
     void removeAt(int index) {
         if (index < 0 || index >= count) { // Use >= here
-            throw std::out_of_range("Index out of range.");
+            throw out_of_range("Index out of range.");
         }
 
         if (index == 0) {
@@ -219,7 +221,7 @@ public:
 
     Node* get(int index) {
         if (index < 0 || index >= count) {
-            throw std::out_of_range("Index out of range.");
+            throw out_of_range("Index out of range.");
         }
 
         int currIndex = 0;
@@ -240,7 +242,7 @@ public:
 
     T& operator[](const int index) {
         if (index >= count) {
-            throw std::out_of_range("Index out of range.");
+            throw out_of_range("Index out of range.");
         }
 
         int currIndex = 0;
@@ -254,12 +256,12 @@ public:
             ++it;
         }
 
-        throw std::out_of_range("Index out of range.");
+        throw out_of_range("Index out of range.");
     }
 
     const T& operator[](const int index) const {
         if (index >= count) {
-            throw std::out_of_range("Index out of range.");
+            throw out_of_range("Index out of range.");
         }
 
         int currIndex = 0;
@@ -273,7 +275,7 @@ public:
             ++it;
         }
 
-        throw std::out_of_range("Index out of range.");
+        throw out_of_range("Index out of range.");
     }
 
     T& getFirst() {

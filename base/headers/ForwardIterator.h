@@ -2,6 +2,8 @@
 #include <iostream>
 #include "SinglyLinkedNode.h"
 
+using namespace std;
+
 template <class T>
 class ForwardIterator {
     typedef SinglyLinkedNode<T> Node;
@@ -39,7 +41,7 @@ public:
         return current != other.current;
     }
 
-    friend std::ostream& operator<<(std::ostream& osStream, const ForwardIterator& it) {
+    friend ostream& operator<<(ostream& osStream, const ForwardIterator& it) {
         osStream << it.current->getValue();
         return osStream;
     }

@@ -8,17 +8,19 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 
+using namespace std;
+
 class InGameState : public GameState {
 public:
     explicit InGameState(GameEngine& game);
-    explicit InGameState(GameEngine& game, const std::string& startNodeId);  // Load from saved node
+    explicit InGameState(GameEngine& game, const string& startNodeId);  // Load from saved node
 
     void handleInput() override;
     void update(float dt) override;
     void render(sf::RenderWindow& window) override;
 
     void saveGame();
-    std::string getCurrentNodeId() const { return currentNodeId; }
+    string getCurrentNodeId() const { return currentNodeId; }
 
 private:
     void drawUIButtons();
@@ -26,7 +28,7 @@ private:
 
     DialogueVisitor dialogueVisitor;
     NTree<Dialogue, MAX_CHOICES>* currentDialogueNode;
-    std::string currentNodeId;
+    string currentNodeId;
 
     // UI elements
     sf::Font uiFont;

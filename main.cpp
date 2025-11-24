@@ -3,16 +3,18 @@
 #include <memory>
 #include <iostream>
 
+using namespace std;
+
 int main() {
     try {
         GameEngine engine;
-        engine.changeState(std::make_unique<MainMenuState>(engine));
+        engine.changeState(make_unique<MainMenuState>(engine));
         engine.run();
-    } catch (const std::exception& e) {
-        std::cerr << "Unhandled exception: " << e.what() << std::endl;
+    } catch (const exception& e) {
+        cerr << "Unhandled exception: " << e.what() << endl;
         return 1;
     } catch (...) {
-        std::cerr << "Unknown exception" << std::endl;
+        cerr << "Unknown exception" << endl;
         return 1;
     }
     return 0;

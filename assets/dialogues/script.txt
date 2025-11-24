@@ -1,0 +1,218 @@
+# DIALOGUE SCRIPT: The Inner City of the Masked Self - EXPANDED EDITION
+
+# --- INITIAL SETUP ---
+ROOT:wake_up
+
+# --- SCENE 1: THE AWAKENING AND THE WHISPER ---
+
+NODE:wake_up
+MSG:You awaken in a damp, silent alleyway. The air is thick with cold fog and the smell of rusted iron. You look up: towering buildings of gray, emotionless architecture stretch into the unseen sky. This is your mind-city, and it's crumbling. A raw, familiar voice whispers: "Look at the mess you've made. It's exactly what you deserve."
+CHOICE:Ignore the voice and search the alley thoroughly. | target:search_alley
+CHOICE:Challenge the voice aggressively. | target:challenge_voice | mana:-5
+CHOICE:Sit down and try to stabilize your mental state (Health recovery focus). | target:stabilize_mind
+
+NODE:stabilize_mind
+MSG:You close your eyes, forcing yourself to breathe despite the oppressive atmosphere. It costs mental effort, but provides immediate relief.
+CHOICE:Proceed to the Main Street. | target:main_street | health:15
+
+NODE:search_alley
+MSG:You find a single, tarnished **Coin** and a tattered, waterproof **Map Fragment** showing three glowing sectors. You also notice faint, almost invisible chalk markings on the wall—a rudimentary cipher.
+CHOICE:Try to interpret the chalk cipher (Requires high willpower). | condition:mana>=10 | target:read_cipher | mana:-10
+CHOICE:Proceed to the Main Street. | target:main_street | item:Tarnished Coin:MISC:0 | item:Map Fragment:QUEST_ITEM:0
+
+NODE:read_cipher
+MSG:The cipher reveals a cryptic clue: "To resist the Critic, find its source of power, not its voice." This insight might help later.
+CHOICE:Proceed to the Main Street. | target:main_street | item:Tarnished Coin:MISC:0 | item:Map Fragment:QUEST_ITEM:0
+
+NODE:challenge_voice
+MSG:The effort of arguing with your inner critic drains your focus and integrity. The voice laughs, "Wasting effort already? Pitiful. You'll never get out."
+CHOICE:Proceed to the Main Street. | target:main_street | health:-10
+
+# --- SCENE 2: THE MAIN STREET & THE NEUTRAL PROJECTION ---
+
+NODE:main_street
+MSG:The street is empty and endless. Before you are three glowing paths. Suddenly, a figure materializes: the **Neutral Projection**, an entity of pure, indifferent logic. It watches you, holding a heavy ledger.
+CHOICE:Ask the Projection what its purpose is. | target:projection_purpose
+CHOICE:Immediately proceed to a sector (No time for talk). | target:choose_sector
+CHOICE:Offer the Tarnished Coin to the Projection. | condition:hasitem:Tarnished Coin | target:projection_bribe | gold:-1
+
+NODE:projection_purpose
+MSG:The Projection speaks in a monotone: "I record the balance. Every action here has a cost. You are spending more than you possess." It points at the sectors.
+CHOICE:Ask for advice on the easiest path. | target:projection_advice
+CHOICE:Proceed to the sectors. | target:choose_sector
+
+NODE:projection_bribe
+MSG:The Projection accepts the coin and notes it in the ledger. "A useless expenditure. But accepted. I will tell you one truth: The Mask is fed by the **Token of Loss**."
+CHOICE:Proceed to the sectors. | target:choose_sector
+
+NODE:projection_advice
+MSG: "Easiest is the **Sector of REGRET**. It deals with the past, which is static. Hardest is the **Sector of FEAR**. It is constantly changing."
+CHOICE:Go to the Sector of REGRET (The Broken Clockwork). | target:regret_sector_start
+CHOICE:Go to the Sector of CRITICISM (The Tower of Expectations). | target:critic_sector_start
+CHOICE:Go to the Sector of FEAR (The Submerged Vault). | target:fear_sector_start
+
+NODE:choose_sector
+MSG:Which way do you go?
+CHOICE:Go to the **Sector of REGRET** (The Broken Clockwork). | target:regret_sector_start
+CHOICE:Go to the **Sector of CRITICISM** (The Tower of Expectations). | target:critic_sector_start
+CHOICE:Go to the **Sector of FEAR** (The Submerged Vault). | target:fear_sector_start
+
+# --- SCENE 3: SECTOR OF REGRET (The Broken Clockwork) ---
+
+NODE:regret_sector_start
+MSG:The area is filled with shattered mechanical devices. A massive, broken clockwork mechanism dominates the area. Standing beside it is the **Shadow of Missed Time**—a hunched figure whose face is obscured by swirling gears. The shadow is blocking the path forward.
+CHOICE:Ask the Shadow about the clockwork. | target:regret_shadow_q1
+CHOICE:Attempt to bypass the Shadow using stealth. | target:regret_stealth | condition:mana>=5
+CHOICE:Try to fix the clockwork mechanism using the Map Fragment insight. | condition:hasitem:Map Fragment | target:fix_clockwork
+
+NODE:regret_shadow_q1
+MSG:The Shadow whispers, "I guard the time you wasted. The moments you let slip away, always seeking perfection instead of completion. You can't undo them, can you?"
+CHOICE:Acknowledge the waste, but argue for moving forward (Psychological breakthrough). | target:regret_shadow_calm | xp:10
+CHOICE:Demand passage and prepare for a struggle. | target:regret_shadow_struggle
+
+NODE:regret_stealth
+MSG:You focus your will to dampen your psychic presence and slip around the hulking Shadow. The effort is tiring but successful.
+CHOICE:You bypassed the Shadow. Continue deeper. | target:regret_midpoint | mana:-5
+
+NODE:regret_shadow_struggle
+MSG:The Shadow lunges, a manifestation of pure, paralyzing inertia! You take psychological damage.
+CHOICE:Flee back to the Main Street. | target:main_street | health:-25
+CHOICE:Focus your will and resist the inertia. | condition:mana>=10 | target:regret_midpoint | mana:-10
+
+NODE:fix_clockwork
+MSG:The Map Fragment shows the specific key components. You mend the clockwork, focusing your will to resolve old, static mental conflicts. The humming stops, and the path is revealed.
+CHOICE:Continue deeper into the sector. | target:regret_midpoint | mana:-15 | xp:15
+
+NODE:regret_shadow_calm
+MSG:You tell the Shadow that regret is a painful necessity, a lesson, not a prison. The Shadow shudders, momentarily stunned by the sincere self-acceptance. It steps aside, weeping oil.
+CHOICE:Continue deeper into the sector. | target:regret_midpoint | health:-15
+
+NODE:regret_midpoint
+MSG:You reach a small altar where the Shadow was fixated. On it rests a small, intricately carved wooden bird, a symbol of a dream you abandoned—the **Token of Loss**. The city sighs as you take it.
+CHOICE:Return to the Main Street now. | target:main_street | item:Token of Loss:QUEST_ITEM:0 | xp:20
+
+# --- SCENE 4: SECTOR OF CRITICISM (The Tower of Expectations) ---
+
+NODE:critic_sector_start
+MSG:A massive, incomplete tower looms, constantly buffeted by a cold wind carrying paper scraps printed with insults and 'shoulds.' This is the **Inner Critic**'s domain. Your cipher clue whispers: 'Find its source of power.'
+CHOICE:Look for a way to climb the tower (Direct Confrontation). | target:climb_tower
+CHOICE:Search for the source of the insulting wind (Following the clue). | target:search_wind_source
+
+NODE:climb_tower
+MSG:The climb is brutal and emotionally exhausting. You finally reach a small window. Inside sits the **Shadow of Unworthiness**.
+CHOICE:Peer inside the window. | target:critic_encounter | health:-20
+CHOICE:Return to the street, the climb was too much. | target:critic_sector_start | health:-10
+
+NODE:search_wind_source
+MSG:You follow the wind to a small, whirring generator hidden in the foundations. It is creating all the paper scraps. Destroying this might weaken the Critic.
+CHOICE:Destroy the generator with brute force (Mental Strain). | target:generator_destroy | mana:-10 | health:-10
+CHOICE:Try to rewire the generator to print praise instead of insults (High focus required). | condition:mana>=20 | target:generator_rewire | mana:-20
+
+NODE:generator_destroy
+MSG:The generator explodes in a shower of negative thoughts. The noise attracts the Shadow of Unworthiness, but it is visibly weaker.
+CHOICE:Face the weakened Shadow. | target:critic_encounter_weakened
+
+NODE:generator_rewire
+MSG:You manage to focus your will and flip the circuit. The generator sputters and begins printing self-affirming statements, which immediately calms the area. The Shadow is severely weakened by positive affirmation and retreats, leaving the path open.
+CHOICE:Continue deeper into the calm tower. | target:critic_midpoint | xp:25
+
+NODE:critic_encounter
+MSG:Inside, the **Shadow of Unworthiness** is wearing a flawless, white porcelain mask. It speaks in your own voice, laced with poison: "You think you belong here? You're a fraud. You'll never be good enough."
+CHOICE:Try to shatter the Shadow's mask with pure mental force. | condition:mana>=15 | target:critic_shatter | mana:-15
+CHOICE:Listen and internalize the critique (self-sabotage). | target:critic_internalize
+
+NODE:critic_encounter_weakened
+MSG:The Shadow is here, but its voice lacks conviction. "You... you still won't be enough," it whispers weakly.
+CHOICE:Strike the weakened Shadow. | target:critic_midpoint | xp:10
+
+NODE:critic_shatter
+MSG:You focus your raw Willpower. The mask cracks. The Shadow screams and vanishes, leaving behind a splintered piece of white ceramic—the **Fragment of Truth**. The room now feels calm.
+CHOICE:Collect the item and return to Main Street. | target:main_street | item:Fragment of Truth:QUEST_ITEM:0 | xp:20
+
+NODE:critic_internalize
+MSG:You accept the words as fact. The Shadow grows stronger, inflicting painful psychological damage before retreating.
+CHOICE:Return, wounded, to the Main Street. | target:main_street | health:-30
+
+NODE:critic_midpoint
+MSG:You find a small, splintered piece of white ceramic—the **Fragment of Truth**. The realization that you are not a fraud strengthens your mental integrity.
+CHOICE:Collect the item and return to Main Street. | target:main_street | item:Fragment of Truth:QUEST_ITEM:0 | xp:20 | health:10
+
+# --- SCENE 5: SECTOR OF FEAR (The Submerged Vault) ---
+
+NODE:fear_sector_start
+MSG:You stand at the edge of a flooded plaza. Beneath the oily, still water is the Submerged Vault, holding repressed traumas. The water ripples, and the **Shadow of Anxiety** rises—a constantly shivering, amorphous shape.
+CHOICE:Try to calm the anxiety by focusing on a stable memory. | target:calm_anxiety
+CHOICE:Dive into the water and confront the vault directly. | target:dive_vault
+CHOICE:Attempt to find a dry path around the water's edge (Cautious approach). | target:fear_stealth
+
+NODE:fear_stealth
+MSG:The path is slippery and narrow. You manage to skirt the main pool, avoiding the worst of the psychic noise, but the tension drains you.
+CHOICE:You reach a small, dry platform near the Vault entrance. | target:vault_platform | health:-10
+
+NODE:calm_anxiety
+MSG:You spend precious mental energy trying to stabilize the environment by recalling a time of safety. It forces the Shadow back down temporarily. You gain focus.
+CHOICE:Quickly dive into the water while the Shadow is suppressed. | target:dive_vault | mana:-10
+
+NODE:dive_vault
+MSG:The water is icy and dark. You are overwhelmed by the cold dread of old fears. You see the Vault door, but the pressure is immense.
+CHOICE:Focus Willpower to force the door open. | condition:mana>=20 | target:fear_vault_open | mana:-20
+CHOICE:Look for an emergency release lever (Requires a key). | condition:hasitem:Shattered Key | target:vault_release | health:-10
+CHOICE:Try to find a weakness in the Vault's structure (searching blindly). | target:fear_search
+
+NODE:vault_release
+MSG:You insert the Shattered Key into the lock. The Vault door opens immediately with a rush of water, clearing the path.
+CHOICE:Enter the Vault. | target:fear_vault_inside | xp:15
+
+NODE:fear_search
+MSG:You fumble in the dark, and an aggressive fear Projection attacks you. You take heavy damage before retreating back to the surface.
+CHOICE:Return to the Main Street. | target:main_street | health:-35
+
+NODE:fear_vault_open
+MSG:The Vault door violently springs open due to your focused mental push.
+CHOICE:Enter the Vault. | target:fear_vault_inside
+
+NODE:fear_vault_inside
+MSG:Inside the Vault, amidst decaying files, you find a small, heavily worn stone: the **Stone of Resilience**. This trauma has been neutralized. You also spot a shard of metal nearby—a **Shattered Key**.
+CHOICE:Collect the stone and the key, then return to Main Street. | target:main_foundry_check | item:Stone of Resilience:QUEST_ITEM:0 | item:Shattered Key:MISC:0 | xp:20
+
+# --- SCENE 6: THE CORE FOUNDRY (The Final Confrontation Check) ---
+
+NODE:main_foundry_check
+MSG:You return to the main street. The map now glows brightly, pointing toward the Core Foundry. The oppressive feeling is lifting. Do you have all the necessary components for self-acceptance?
+CHOICE:Proceed to the Core Foundry (If you have all three main items). | condition:hasitem:Token of Loss | condition:hasitem:Fragment of Truth | condition:hasitem:Stone of Resilience | target:foundry_entrance
+CHOICE:I still need to explore the sectors further. | target:main_street
+CHOICE:I only have the key, perhaps that is enough? | condition:hasitem:Shattered Key | target:foundry_entrance_key
+
+NODE:foundry_entrance_key
+MSG:You use the Shattered Key to unlock the external door. The inner door remains sealed. The **Masked Self** laughs: "You opened the door, but you still don't know who you are. The key is just hardware." You must find the true psychological keys.
+CHOICE:Return to the Main Street. | target:main_street
+
+NODE:foundry_entrance
+MSG:The Core Foundry is a massive, pulsing structure at the center of the city. The three items you carry begin to faintly hum. As you enter, the **Masked Self**—the ultimate Projection of your perfect, external image—stands before you. It wears an impenetrable, polished metal Mask and holds a cracked, shimmering mirror.
+CHOICE:Confront the Masked Self. | target:final_confrontation
+
+NODE:final_confrontation
+MSG:The Masked Self speaks, its voice resonating with cold authority: "I am the perfect lie. I am what you present. You cannot destroy me. Submit, or I will extinguish this weak, awakened self."
+CHOICE:Present the three items (Loss, Truth, Resilience). | target:present_items
+CHOICE:Try to bypass the Masked Self and grab the mirror. | target:attack_mask | health:-15 | mana:-15
+
+NODE:present_items
+MSG:You place the **Token of Loss** (Acknowledged Regret), the **Fragment of Truth** (Shattered Criticism), and the **Stone of Resilience** (Neutralized Fear) on the ground. The combined psychological weight of accepted reality is overwhelming. The Masked Self shudders, its polished metal cracking as the lie unravels. It collapses, revealing your own wounded, true face beneath. The **Broken Mirror** falls from its hands.
+CHOICE:Pick up the Broken Mirror. | target:get_mirror | item:Broken Mirror:QUEST_ITEM:0 | xp:50
+
+NODE:attack_mask
+MSG:Your attack bounces off the metal Mask. It's too strong. The Masked Self uses your focus to reinforce its barrier. You are forced to retreat and regroup.
+CHOICE:Return to the Main Street. | target:main_street
+
+# --- SCENE 7: THE HEALING PATH ---
+
+NODE:get_mirror
+MSG:The Mirror is cracked, but perfectly reflects your true, unmasked face. The ground beneath the Foundry splits, revealing a path leading upwards and out of the mind-city. The whispers of criticism cease, replaced by a deep, gentle quiet. You have accepted your flaws and gained self-compassion.
+CHOICE:Step onto the Healing Path and begin the ascent. | target:healing_path_start | health:100 | mana:100
+
+NODE:healing_path_start
+MSG:The oppressive gray structures fade as you climb. You are returning to reality, not fixed, but capable of rebuilding. The climb is difficult, but the path is now visible and clear.
+CHOICE:Awaken. | target:end_dialogue
+
+NODE:end_dialogue
+MSG:The oppressive weight lifts. You open your eyes. The journey has ended, but the work—the rebuilding of the true self—has just begun.
