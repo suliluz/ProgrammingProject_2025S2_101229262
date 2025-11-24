@@ -335,10 +335,7 @@ void DialogueVisitor::drawStatsPanel() {
     if (!player) return;
 
     sf::Vector2u windowSize = window.getSize();
-    float windowWidth = static_cast<float>(windowSize.x);
-    float windowHeight = static_cast<float>(windowSize.y);
 
-    // Panel positioning (top-left corner)
     float panelX = 10.0f;
     float panelY = 10.0f;
     float panelWidth = 300.0f;
@@ -455,7 +452,6 @@ void DialogueVisitor::drawInventoryPanel() {
 
     sf::Vector2u windowSize = window.getSize();
     float windowWidth = static_cast<float>(windowSize.x);
-    float windowHeight = static_cast<float>(windowSize.y);
 
     // Panel positioning (top-right corner, below stats if displayed)
     float panelX = windowWidth - 350.0f;
@@ -495,8 +491,7 @@ void DialogueVisitor::drawInventoryPanel() {
         emptyText.setPosition({panelX + 15.0f, currentY + 50.0f});
         window.draw(emptyText);
     } else {
-        // Draw each item using iterator
-        auto& itemsList = const_cast<List<Item>&>(inventory.getItems());
+        auto& itemsList = player->getInventory().getItems();
         auto it = itemsList.getIterator();
         auto endIt = it.end();
         int itemsDrawn = 0;

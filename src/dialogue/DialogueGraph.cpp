@@ -210,7 +210,6 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
 
     return node;
 }
-}
 
 function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree<Dialogue, MAX_CHOICES>* targetNode) {
     return [this, choiceInfo, targetNode]() {

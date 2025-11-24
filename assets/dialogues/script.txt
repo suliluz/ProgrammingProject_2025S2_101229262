@@ -149,6 +149,12 @@ NODE:fear_stealth
 MSG:The path is slippery and narrow. You manage to skirt the main pool, avoiding the worst of the psychic noise, but the tension drains you.
 CHOICE:You reach a small, dry platform near the Vault entrance. | target:vault_platform | health:-10
 
+NODE:vault_platform
+MSG:You stand on the dry platform, catching your breath. The Vault entrance looms before you. The water still churns with anxiety, but from here you have a moment of clarity. The door is within reach.
+CHOICE:Attempt to force the Vault door open with willpower. | condition:mana>=20 | target:fear_vault_open | mana:-20
+CHOICE:Search the platform for a key or release mechanism. | target:fear_search
+CHOICE:Return to the main street. | target:main_street
+
 NODE:calm_anxiety
 MSG:You spend precious mental energy trying to stabilize the environment by recalling a time of safety. It forces the Shadow back down temporarily. You gain focus.
 CHOICE:Quickly dive into the water while the Shadow is suppressed. | target:dive_vault | mana:-10
