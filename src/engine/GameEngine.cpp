@@ -36,7 +36,7 @@ void GameEngine::loadDialogues() {
     // Load dialogue files
     string scriptPath = string(ASSETS_PATH) + "dialogues/script.txt";
     if (dialogueGraph->loadFromFile(scriptPath)) {
-        cout << "Dialogues loaded successfully!" << endl;
+        cout << "Dialogues loaded." << endl;
 
     } else {
         cerr << "Failed to load initial dialogue file!" << endl;
@@ -47,7 +47,7 @@ void GameEngine::loadMusic() {
     // Load background music from assets folder
     string musicPath = string(ASSETS_PATH) + "Honami-city.mp3";
     if (!backgroundMusic.openFromFile(musicPath)) {
-        cerr << "Warning: Could not load background music from " << musicPath << endl;
+        cerr << "Warning: Could not load background music:" << musicPath << endl;
         return;
     }
 
@@ -60,7 +60,7 @@ void GameEngine::loadMusic() {
     // Start playing the music
     backgroundMusic.play();
 
-    cout << "Background music loaded and playing!" << endl;
+    cout << "Background music loaded." << endl;
 }
 
 GameEngine::~GameEngine() {

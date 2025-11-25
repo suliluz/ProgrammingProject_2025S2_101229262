@@ -49,15 +49,15 @@ private:
     void drawStatsPanel();
     void drawInventoryPanel();
     void drawHistoryPanel(); // SinglyLinkedList: Draw conversation history
-    string wrapText(const string& text, float maxWidth);
+    std::string wrapText(const std::string& text, float maxWidth);
 
     sf::RenderWindow& window;
     sf::Font font;
     sf::Text* text;
     sf::Text* speakerText;
-    string currentSpeaker;
-    string fullMessage;
-    string currentMessage;
+    sf::String currentSpeaker;
+    sf::String fullMessage;
+    sf::String currentMessage;
     sf::Time characterInterval;
     sf::Time baseCharacterInterval; // Base speed for text
     sf::Time elapsedTime;

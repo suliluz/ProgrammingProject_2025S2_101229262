@@ -3,6 +3,11 @@
 #include <algorithm> // For min() and max() functions
 #include "game/Player.h"
 
+// Helper to convert std::string (UTF-8) to sf::String
+sf::String to_sf_string(const std::string& s) {
+    return sf::String::fromUtf8(s.begin(), s.end());
+}
+
 DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
     : window(win), baseCharacterInterval(sf::seconds(0.05f)), characterInterval(sf::seconds(0.05f)),
       dialogueActive(false), selectedChoice(0), currentDialogue(nullptr), player(nullptr),
@@ -13,13 +18,15 @@ DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
     }
 
     // Main dialogue text
-    text = new sf::Text(font);
+    text = new sf::Text();
+    text->setFont(font);
     text->setCharacterSize(24);
     text->setFillColor(sf::Color::White);
     text->setPosition({70, 380});  // Moved to make room for speaker name
 
     // Speaker name text
-    speakerText = new sf::Text(font);
+    speakerText = new sf::Text();
+    speakerText->setFont(font);
     speakerText->setCharacterSize(28);
     speakerText->setFillColor(sf::Color(255, 215, 0));  // Gold color for speaker
     speakerText->setStyle(sf::Text::Bold);
@@ -39,39 +46,35 @@ void DialogueVisitor::visit(Dialogue& dialogue) {
     clearChoices();
     dialogueActive = true;
     currentDialogue = &dialogue;
-    currentSpeaker = dialogue.speaker;
+    currentSpeaker = to_sf_string(dialogue.speaker);
 
     // SinglyLinkedList: Log this dialogue to conversation history
     conversationLog.push(DialogueEntry(dialogue.speaker, dialogue.message));
     cout << "Logged dialogue to history (total entries: " << conversationLog.length() << ")" << endl;
 
     // Update speaker name
-    if (!currentSpeaker.empty()) {
-        speakerText->setString(currentSpeaker);
-    } else {
-        speakerText->setString("");
-    }
+    speakerText->setString(currentSpeaker);
 
     // Wrap text to fit within window (responsive width)
     sf::Vector2u windowSize = window.getSize();
     float maxTextWidth = static_cast<float>(windowSize.x) - 100.0f; // Leave margins
-    fullMessage = wrapText(dialogue.message, maxTextWidth);
+    fullMessage = to_sf_string(wrapText(dialogue.message, maxTextWidth));
     currentMessage.clear();
+    text->setString(currentMessage);
     elapsedTime = sf::Time::Zero;
     selectedChoice = 0;
 
     auto it = dialogue.choices.getIterator();
     auto endIt = it.end();
-    int i = 0;
     while(it != endIt) {
-        auto* choiceText = new sf::Text(font);
+        auto* choiceText = new sf::Text();
+        choiceText->setFont(font);
         choiceText->setCharacterSize(20);
         choiceText->setFillColor(sf::Color::White);
-        choiceText->setString(it.getCurrent()->getValue().text);
+        choiceText->setString(to_sf_string(it.getCurrent()->getValue().text));
         // Position will be set in render() based on window size
         choiceTexts.push(choiceText);
         ++it;
-        i++;
     }
     cout << "DialogueVisitor visit end" << endl;
 }
@@ -85,7 +88,7 @@ void DialogueVisitor::visit(Choice& choice) {
 void DialogueVisitor::update(sf::Time deltaTime) {
     if (!dialogueActive) return;
 
-    if (currentMessage.length() < fullMessage.length()) {
+    if (currentMessage.getSize() < fullMessage.getSize()) {
         elapsedTime += deltaTime;
         while (elapsedTime >= characterInterval) {
             elapsedTime -= characterInterval;
@@ -116,8 +119,7 @@ void DialogueVisitor::render() {
     float boxY = windowHeight - boxHeight - boxMargin;
 
     // Draw speaker name above dialogue box (left side) if there's a speaker
-    float contentMargin = 30.0f;
-    if (!currentSpeaker.empty()) {
+    if (!currentSpeaker.isEmpty()) {
         speakerText->setPosition({boxMargin + 10, boxY - 40});
         window.draw(*speakerText);
     }
@@ -131,12 +133,13 @@ void DialogueVisitor::render() {
     window.draw(dialogueBox);
 
     // Update text position
-    text->setPosition({boxMargin + contentMargin, boxY + 20});
+    text->setPosition({boxMargin + 30.0f, boxY + 20});
     window.draw(*text);
 
     // Show fast-forward hint if text is still animating
-    if (currentMessage.length() < fullMessage.length()) {
-        sf::Text fastForwardHint(font);
+    if (currentMessage.getSize() < fullMessage.getSize()) {
+        sf::Text fastForwardHint;
+        fastForwardHint.setFont(font);
         fastForwardHint.setCharacterSize(16);
         fastForwardHint.setFillColor(sf::Color(180, 180, 180));
         fastForwardHint.setString("[Hold Space to fast-forward]");
@@ -144,14 +147,15 @@ void DialogueVisitor::render() {
         window.draw(fastForwardHint);
     }
 
-    if (currentMessage.length() == fullMessage.length()) {
+    if (currentMessage.getSize() == fullMessage.getSize()) {
         if (choiceTexts.isEmpty()) {
             // No choices - show "Press Enter to continue" hint
-            sf::Text continueHint(font);
+            sf::Text continueHint;
+            continueHint.setFont(font);
             continueHint.setCharacterSize(18);
             continueHint.setFillColor(sf::Color(220, 220, 220));
             continueHint.setString("[Press Enter to continue]");
-            float hintX = (windowWidth - continueHint.getLocalBounds().size.x) / 2;
+            float hintX = (windowWidth - continueHint.getLocalBounds().width) / 2;
             continueHint.setPosition({hintX, boxY + boxHeight - 35});
             window.draw(continueHint);
         } else {
@@ -159,25 +163,22 @@ void DialogueVisitor::render() {
             float choiceWidth = min(windowWidth * 0.40f, 450.0f); // 40% of window or max 450px
             float choiceX = windowWidth - boxMargin - choiceWidth;
 
-            // Calculate spacing based on number of choices and available space
             int numChoices = choiceTexts.length();
-            float availableHeight = boxY - 100; // Space from top to dialogue box minus margin
+            float availableHeight = boxY - 100;
             float choiceHeight = 30.0f;
             float maxChoiceSpacing = 40.0f;
             float choiceSpacing = min(maxChoiceSpacing, (availableHeight - (numChoices * choiceHeight)) / (numChoices + 1));
 
-            // Make sure spacing is at least 5px
             if (choiceSpacing < 5.0f) {
                 choiceSpacing = 5.0f;
                 choiceHeight = max(25.0f, (availableHeight - (choiceSpacing * (numChoices + 1))) / numChoices);
             }
 
-            float choiceStartY = boxY - 30; // Start just above the dialogue box
+            float choiceStartY = boxY - 30;
 
             for (int i = 0; i < choiceTexts.length(); ++i) {
                 float choiceY = choiceStartY - ((choiceTexts.length() - i) * (choiceHeight + choiceSpacing));
 
-                // Make sure choice doesn't go off screen
                 if (choiceY < 20) {
                     choiceY = 20 + i * (choiceHeight + 5);
                 }
@@ -186,7 +187,7 @@ void DialogueVisitor::render() {
                 choiceBox.setPosition({choiceX, choiceY});
 
                 if (i == selectedChoice) {
-                    choiceBox.setFillColor(sf::Color(80, 120, 180, 200));  // Highlighted
+                    choiceBox.setFillColor(sf::Color(80, 120, 180, 200));
                     choiceBox.setOutlineColor(sf::Color(150, 200, 255));
                     choiceBox.setOutlineThickness(3);
                 } else {
@@ -196,35 +197,31 @@ void DialogueVisitor::render() {
                 }
                 window.draw(choiceBox);
 
-                // Update choice text position and wrap if needed
                 sf::Text* choiceText = choiceTexts[i];
                 choiceText->setPosition({choiceX + 10, choiceY + 4});
 
-                // Check if text overflows and truncate with ellipsis if needed
-                string originalText = choiceText->getString();
-                float maxTextWidth = choiceWidth - 20; // Leave margins
+                sf::String originalString = choiceText->getString();
+                float maxTextWidth = choiceWidth - 20;
 
-                choiceText->setString(originalText);
-                if (choiceText->getLocalBounds().size.x > maxTextWidth) {
-                    // Truncate text with ellipsis
-                    string truncated = originalText;
-                    while (truncated.length() > 3 && choiceText->getLocalBounds().size.x > maxTextWidth) {
-                        truncated = truncated.substr(0, truncated.length() - 1);
-                        choiceText->setString(truncated + "...");
+                if (choiceText->getLocalBounds().width > maxTextWidth) {
+                    sf::String truncatedString = originalString;
+                    while (truncatedString.getSize() > 3) {
+                        truncatedString.erase(truncatedString.getSize() - 1);
+                        choiceText->setString(truncatedString + "...");
+                        if (choiceText->getLocalBounds().width <= maxTextWidth) {
+                            break;
+                        }
                     }
                 }
-
                 window.draw(*choiceText);
             }
         }
     }
 
-    // Draw inventory panel if toggled on
     if (showInventory) {
         drawInventoryPanel();
     }
 
-    // SinglyLinkedList: Draw conversation history panel if toggled on
     if (showHistory) {
         drawHistoryPanel();
     }
@@ -234,30 +231,25 @@ void DialogueVisitor::handleInput(const sf::Event& event) {
     if (!dialogueActive) return;
 
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
-        // 'I' key to toggle inventory
         if (keyPressed->code == sf::Keyboard::Key::I) {
             toggleInventoryView();
             return;
         }
 
-        // 'H' key to toggle history (SinglyLinkedList conversation log)
         if (keyPressed->code == sf::Keyboard::Key::H) {
             toggleHistoryView();
             return;
         }
 
-        // Space bar to skip/fast-forward text animation
         if (keyPressed->code == sf::Keyboard::Key::Space) {
-            if (currentMessage.length() < fullMessage.length()) {
+            if (currentMessage.getSize() < fullMessage.getSize()) {
                 skipToEnd();
                 return;
             }
         }
 
-        // Only allow other inputs when text is fully displayed
-        if (currentMessage.length() < fullMessage.length()) return;
+        if (currentMessage.getSize() < fullMessage.getSize()) return;
 
-        // If no choices available (leaf node), pressing Enter ends the dialogue
         if (choiceTexts.isEmpty() && keyPressed->code == sf::Keyboard::Key::Enter) {
             dialogueActive = false;
             return;
@@ -274,8 +266,8 @@ void DialogueVisitor::handleInput(const sf::Event& event) {
 }
 
 void DialogueVisitor::nextCharacter() {
-    if (currentMessage.length() < fullMessage.length()) {
-        currentMessage += fullMessage[currentMessage.length()];
+    if (currentMessage.getSize() < fullMessage.getSize()) {
+        currentMessage += fullMessage[currentMessage.getSize()];
         text->setString(currentMessage);
     }
 }
@@ -292,45 +284,34 @@ void DialogueVisitor::clearChoices() {
     }
 }
 
-string DialogueVisitor::wrapText(const string& text, float maxWidth) {
-    string result;
-    string currentLine;
-    string word;
+std::string DialogueVisitor::wrapText(const std::string& text, float maxWidth) {
+    sf::String sfText = to_sf_string(text);
+    std::string result;
+    sf::String currentLine;
+    sf::String word;
 
-    sf::Text tempText(font);
+    sf::Text tempText;
+    tempText.setFont(font);
     tempText.setCharacterSize(24);
 
-    for (size_t i = 0; i < text.length(); ++i) {
-        char c = text[i];
-
-        if (c == ' ' || c == '\n' || i == text.length() - 1) {
-            // Handle last character
-            if (i == text.length() - 1 && c != ' ' && c != '\n') {
-                word += c;
-            }
-
-            // Test if adding this word exceeds max width
-            string testLine = currentLine;
-            if (!testLine.empty()) {
-                testLine += " ";
+    for (sf::Uint32 c : sfText) {
+        if (c == ' ' || c == '\n') {
+            sf::String testLine = currentLine;
+            if (!testLine.isEmpty()) {
+                testLine += ' ';
             }
             testLine += word;
 
             tempText.setString(testLine);
-            float lineWidth = tempText.getLocalBounds().size.x;
-
-            if (lineWidth > maxWidth && !currentLine.empty()) {
-                // Line would be too long, start new line
-                result += currentLine + "\n";
+            if (tempText.getLocalBounds().width > maxWidth && !currentLine.isEmpty()) {
+                result += currentLine.toAnsiString() + "\n";
                 currentLine = word;
             } else {
-                // Add word to current line
                 currentLine = testLine;
             }
 
-            // Handle explicit newlines
             if (c == '\n') {
-                result += currentLine + "\n";
+                result += currentLine.toAnsiString();
                 currentLine.clear();
             }
 
@@ -340,9 +321,22 @@ string DialogueVisitor::wrapText(const string& text, float maxWidth) {
         }
     }
 
-    // Add remaining line
-    if (!currentLine.empty()) {
-        result += currentLine;
+    sf::String testLine = currentLine;
+    if (!testLine.isEmpty()) {
+        testLine += ' ';
+    }
+    testLine += word;
+
+    tempText.setString(testLine);
+    if (tempText.getLocalBounds().width > maxWidth && !currentLine.isEmpty()) {
+        result += currentLine.toAnsiString() + "\n";
+        currentLine = word;
+    } else {
+        currentLine = testLine;
+    }
+
+    if (!currentLine.isEmpty()) {
+        result += currentLine.toAnsiString();
     }
 
     return result;
@@ -358,41 +352,37 @@ void DialogueVisitor::drawStatsPanel() {
     float panelWidth = 300.0f;
     float panelHeight = 280.0f;
 
-    // Draw panel background
     sf::RectangleShape panel({panelWidth, panelHeight});
     panel.setPosition({panelX, panelY});
-    panel.setFillColor(sf::Color(0, 0, 0, 200));  // Semi-transparent black
+    panel.setFillColor(sf::Color(0, 0, 0, 200));
     panel.setOutlineColor(sf::Color(100, 150, 200, 200));
     panel.setOutlineThickness(2);
     window.draw(panel);
 
-    // Get player stats
     const auto& stats = player->getStats();
     const auto& inventory = player->getInventory();
 
-    // Create text elements for stats
     float currentY = panelY + 10.0f;
     float lineHeight = 20.0f;
 
-    // Player name
-    sf::Text playerName(font);
+    sf::Text playerName;
+    playerName.setFont(font);
     playerName.setCharacterSize(18);
-    playerName.setFillColor(sf::Color(255, 215, 0));  // Gold
+    playerName.setFillColor(sf::Color(255, 215, 0));
     playerName.setStyle(sf::Text::Bold);
-    playerName.setString(stats.getName());
+    playerName.setString(to_sf_string(stats.getName()));
     playerName.setPosition({panelX + 10.0f, currentY});
     window.draw(playerName);
     currentY += lineHeight + 5.0f;
 
-    // Health bar
-    sf::Text healthLabel(font);
+    sf::Text healthLabel;
+    healthLabel.setFont(font);
     healthLabel.setCharacterSize(14);
     healthLabel.setFillColor(sf::Color::White);
     healthLabel.setString("Health: " + to_string(stats.getCurrentHealth()) + "/" + to_string(stats.getMaxHealth()));
     healthLabel.setPosition({panelX + 10.0f, currentY});
     window.draw(healthLabel);
 
-    // Health bar visual
     float barWidth = panelWidth - 20.0f;
     float healthPercent = static_cast<float>(stats.getCurrentHealth()) / stats.getMaxHealth();
     sf::RectangleShape healthBarBg({barWidth, 8.0f});
@@ -402,19 +392,18 @@ void DialogueVisitor::drawStatsPanel() {
 
     sf::RectangleShape healthBar({barWidth * healthPercent, 8.0f});
     healthBar.setPosition({panelX + 10.0f, currentY + lineHeight + 2.0f});
-    healthBar.setFillColor(sf::Color(200, 50, 50));  // Red for health
+    healthBar.setFillColor(sf::Color(200, 50, 50));
     window.draw(healthBar);
     currentY += lineHeight + 12.0f;
 
-    // Mana bar
-    sf::Text manaLabel(font);
+    sf::Text manaLabel;
+    manaLabel.setFont(font);
     manaLabel.setCharacterSize(14);
     manaLabel.setFillColor(sf::Color::White);
     manaLabel.setString("Mana: " + to_string(stats.getCurrentMana()) + "/" + to_string(stats.getMaxMana()));
     manaLabel.setPosition({panelX + 10.0f, currentY});
     window.draw(manaLabel);
 
-    // Mana bar visual
     float manaPercent = static_cast<float>(stats.getCurrentMana()) / stats.getMaxMana();
     sf::RectangleShape manaBarBg({barWidth, 8.0f});
     manaBarBg.setPosition({panelX + 10.0f, currentY + lineHeight + 2.0f});
@@ -423,12 +412,12 @@ void DialogueVisitor::drawStatsPanel() {
 
     sf::RectangleShape manaBar({barWidth * manaPercent, 8.0f});
     manaBar.setPosition({panelX + 10.0f, currentY + lineHeight + 2.0f});
-    manaBar.setFillColor(sf::Color(50, 100, 200));  // Blue for mana
+    manaBar.setFillColor(sf::Color(50, 100, 200));
     window.draw(manaBar);
     currentY += lineHeight + 12.0f;
 
-    // Stats display
-    sf::Text statsLabel(font);
+    sf::Text statsLabel;
+    statsLabel.setFont(font);
     statsLabel.setCharacterSize(12);
     statsLabel.setFillColor(sf::Color(180, 180, 180));
     statsLabel.setString("LVL: " + to_string(stats.getLevel()) + " | XP: " + to_string(stats.getExperience()));
@@ -436,30 +425,31 @@ void DialogueVisitor::drawStatsPanel() {
     window.draw(statsLabel);
     currentY += lineHeight;
 
-    // Combat stats (smaller text)
-    sf::Text combatStats(font);
+    sf::Text combatStats;
+    combatStats.setFont(font);
     combatStats.setCharacterSize(12);
     combatStats.setFillColor(sf::Color(150, 150, 150));
-    combatStats.setString("STR: " + to_string(stats.getStrength()) + " | DEF: " + to_string(stats.getDefense()) +
-                         "\nINT: " + to_string(stats.getIntelligence()) + " | AGI: " + to_string(stats.getAgility()));
+    combatStats.setString(to_sf_string("STR: " + to_string(stats.getStrength()) + " | DEF: " + to_string(stats.getDefense()) +
+                         "\nINT: " + to_string(stats.getIntelligence()) + " | AGI: " + to_string(stats.getAgility())));
     combatStats.setPosition({panelX + 10.0f, currentY});
     window.draw(combatStats);
     currentY += lineHeight * 2.2f;
 
-    // Gold and inventory capacity
-    sf::Text goldText(font);
+    sf::Text goldText;
+    goldText.setFont(font);
     goldText.setCharacterSize(13);
-    goldText.setFillColor(sf::Color(255, 215, 0));  // Gold color
+    goldText.setFillColor(sf::Color(255, 215, 0));
     goldText.setString("Gold: " + to_string(inventory.getGold()));
     goldText.setPosition({panelX + 10.0f, currentY});
     window.draw(goldText);
     currentY += lineHeight;
 
-    sf::Text inventoryText(font);
+    sf::Text inventoryText;
+    inventoryText.setFont(font);
     inventoryText.setCharacterSize(12);
     inventoryText.setFillColor(sf::Color(150, 150, 150));
-    inventoryText.setString("Items: " + to_string(inventory.getItemCount()) + " | Weight: " +
-                           to_string(inventory.getCurrentWeight()) + "/" + to_string(inventory.getMaxWeight()));
+    inventoryText.setString(to_sf_string("Items: " + to_string(inventory.getItemCount()) + " | Weight: " +
+                           to_string(inventory.getCurrentWeight()) + "/" + to_string(inventory.getMaxWeight())));
     inventoryText.setPosition({panelX + 10.0f, currentY});
     window.draw(inventoryText);
 }
@@ -470,24 +460,22 @@ void DialogueVisitor::drawInventoryPanel() {
     sf::Vector2u windowSize = window.getSize();
     float windowWidth = static_cast<float>(windowSize.x);
 
-    // Panel positioning (top-right corner, below stats if displayed)
     float panelX = windowWidth - 350.0f;
     float panelY = 10.0f;
     float panelWidth = 340.0f;
     float panelHeight = 500.0f;
 
-    // Draw panel background
     sf::RectangleShape panel({panelWidth, panelHeight});
     panel.setPosition({panelX, panelY});
-    panel.setFillColor(sf::Color(0, 0, 0, 220));  // Semi-transparent black
-    panel.setOutlineColor(sf::Color(150, 100, 200, 200));  // Purple outline for inventory
+    panel.setFillColor(sf::Color(0, 0, 0, 220));
+    panel.setOutlineColor(sf::Color(150, 100, 200, 200));
     panel.setOutlineThickness(2);
     window.draw(panel);
 
-    // Title
-    sf::Text inventoryTitle(font);
+    sf::Text inventoryTitle;
+    inventoryTitle.setFont(font);
     inventoryTitle.setCharacterSize(18);
-    inventoryTitle.setFillColor(sf::Color(200, 150, 255));  // Purple
+    inventoryTitle.setFillColor(sf::Color(200, 150, 255));
     inventoryTitle.setStyle(sf::Text::Bold);
     inventoryTitle.setString("INVENTORY (Press I to close)");
     inventoryTitle.setPosition({panelX + 10.0f, panelY + 10.0f});
@@ -495,13 +483,14 @@ void DialogueVisitor::drawInventoryPanel() {
 
     float currentY = panelY + 35.0f;
     float lineHeight = 18.0f;
-    int maxItemsVisible = 22; // Approximate items that fit in the panel
+    int maxItemsVisible = 22;
 
     const auto& inventory = player->getInventory();
     int itemCount = inventory.getItemCount();
 
     if (itemCount == 0) {
-        sf::Text emptyText(font);
+        sf::Text emptyText;
+        emptyText.setFont(font);
         emptyText.setCharacterSize(14);
         emptyText.setFillColor(sf::Color(150, 150, 150));
         emptyText.setString("No items yet");
@@ -516,12 +505,12 @@ void DialogueVisitor::drawInventoryPanel() {
         while (it != endIt && itemsDrawn < maxItemsVisible) {
             const Item& item = it.getCurrent()->getValue();
 
-            sf::Text itemText(font);
+            sf::Text itemText;
+            itemText.setFont(font);
             itemText.setCharacterSize(13);
             itemText.setFillColor(sf::Color::White);
 
-            // Format: [Type] Name - Value gold
-            string typeStr = "";
+            string typeStr;
             switch (item.type) {
                 case ItemType::WEAPON: typeStr = "[W] "; break;
                 case ItemType::ARMOR: typeStr = "[A] "; break;
@@ -531,19 +520,20 @@ void DialogueVisitor::drawInventoryPanel() {
                 default: typeStr = "[*] "; break;
             }
 
-            string displayText = typeStr + item.name;
-            if (displayText.length() > 40) {
-                displayText = displayText.substr(0, 37) + "...";
+            sf::String displayText = to_sf_string(typeStr + item.name);
+            if (displayText.getSize() > 40) {
+                displayText.erase(37, displayText.getSize() - 37);
+                displayText += "...";
             }
 
             itemText.setString(displayText);
             itemText.setPosition({panelX + 10.0f, currentY});
             window.draw(itemText);
 
-            // Draw value on the right side
-            sf::Text valueText(font);
+            sf::Text valueText;
+            valueText.setFont(font);
             valueText.setCharacterSize(12);
-            valueText.setFillColor(sf::Color(255, 215, 0));  // Gold color
+            valueText.setFillColor(sf::Color(255, 215, 0));
             valueText.setString(to_string(item.value));
             valueText.setPosition({panelX + panelWidth - 50.0f, currentY});
             window.draw(valueText);
@@ -554,9 +544,9 @@ void DialogueVisitor::drawInventoryPanel() {
         }
     }
 
-    // Show scroll hint if there are more items
     if (itemCount > maxItemsVisible) {
-        sf::Text scrollHint(font);
+        sf::Text scrollHint;
+        scrollHint.setFont(font);
         scrollHint.setCharacterSize(11);
         scrollHint.setFillColor(sf::Color(150, 150, 150));
         scrollHint.setString("... and " + to_string(itemCount - maxItemsVisible) + " more");
@@ -564,8 +554,8 @@ void DialogueVisitor::drawInventoryPanel() {
         window.draw(scrollHint);
     }
 
-    // Draw footer with weight info
-    sf::Text weightInfo(font);
+    sf::Text weightInfo;
+    weightInfo.setFont(font);
     weightInfo.setCharacterSize(12);
     weightInfo.setFillColor(sf::Color(180, 180, 180));
     weightInfo.setString("Weight: " + to_string(inventory.getCurrentWeight()) + "/" + to_string(inventory.getMaxWeight()));
@@ -582,7 +572,6 @@ void DialogueVisitor::setTextSpeed(float speed) {
     characterInterval = sf::seconds(baseCharacterInterval.asSeconds() / speed);
 }
 
-// SinglyLinkedList data structure utilization: Draw conversation history panel
 void DialogueVisitor::drawHistoryPanel() {
     if (!player) return;
 
@@ -590,24 +579,22 @@ void DialogueVisitor::drawHistoryPanel() {
     float windowWidth = static_cast<float>(windowSize.x);
     float windowHeight = static_cast<float>(windowSize.y);
 
-    // Panel positioning (centered on screen)
     float panelWidth = min(800.0f, windowWidth - 40.0f);
     float panelHeight = min(600.0f, windowHeight - 80.0f);
     float panelX = (windowWidth - panelWidth) / 2.0f;
     float panelY = (windowHeight - panelHeight) / 2.0f;
 
-    // Draw panel background
     sf::RectangleShape panel({panelWidth, panelHeight});
     panel.setPosition({panelX, panelY});
-    panel.setFillColor(sf::Color(0, 0, 0, 240));  // Almost opaque black
-    panel.setOutlineColor(sf::Color(200, 150, 100, 200));  // Gold outline for history
+    panel.setFillColor(sf::Color(0, 0, 0, 240));
+    panel.setOutlineColor(sf::Color(200, 150, 100, 200));
     panel.setOutlineThickness(3);
     window.draw(panel);
 
-    // Title
-    sf::Text historyTitle(font);
+    sf::Text historyTitle;
+    historyTitle.setFont(font);
     historyTitle.setCharacterSize(20);
-    historyTitle.setFillColor(sf::Color(255, 215, 0));  // Gold
+    historyTitle.setFillColor(sf::Color(255, 215, 0));
     historyTitle.setStyle(sf::Text::Bold);
     historyTitle.setString("CONVERSATION HISTORY (Press H to close)");
     historyTitle.setPosition({panelX + 15.0f, panelY + 10.0f});
@@ -615,11 +602,11 @@ void DialogueVisitor::drawHistoryPanel() {
 
     float currentY = panelY + 45.0f;
     float lineHeight = 18.0f;
-    int maxEntriesVisible = static_cast<int>((panelHeight - 60.0f) / (lineHeight * 3)); // Each entry ~3 lines
+    int maxEntriesVisible = static_cast<int>((panelHeight - 60.0f) / (lineHeight * 3));
 
-    // SinglyLinkedList iteration: Display conversation log (forward-only traversal)
     if (conversationLog.length() == 0) {
-        sf::Text emptyText(font);
+        sf::Text emptyText;
+        emptyText.setFont(font);
         emptyText.setCharacterSize(14);
         emptyText.setFillColor(sf::Color(150, 150, 150));
         emptyText.setString("No conversation history yet");
@@ -629,44 +616,42 @@ void DialogueVisitor::drawHistoryPanel() {
         auto it = conversationLog.getIterator();
         int entriesDrawn = 0;
 
-        // Forward iteration through SinglyLinkedList
         while (it != conversationLog.getIterator().end() && entriesDrawn < maxEntriesVisible) {
             const DialogueEntry& entry = it.getCurrent()->getValue();
 
-            // Speaker name
-            sf::Text speakerLabel(font);
+            sf::Text speakerLabel;
+            speakerLabel.setFont(font);
             speakerLabel.setCharacterSize(14);
-            speakerLabel.setFillColor(sf::Color(255, 200, 100));  // Gold-ish
+            speakerLabel.setFillColor(sf::Color(255, 200, 100));
             speakerLabel.setStyle(sf::Text::Bold);
-            speakerLabel.setString(entry.speaker.empty() ? "..." : entry.speaker);
+            speakerLabel.setString(to_sf_string(entry.speaker.empty() ? "..." : entry.speaker));
             speakerLabel.setPosition({panelX + 15.0f, currentY});
             window.draw(speakerLabel);
 
             currentY += lineHeight;
 
-            // Message text (wrapped)
             string wrappedMessage = wrapText(entry.message, panelWidth - 30.0f);
-            sf::Text messageText(font);
+            sf::Text messageText;
+            messageText.setFont(font);
             messageText.setCharacterSize(12);
             messageText.setFillColor(sf::Color(220, 220, 220));
-            messageText.setString(wrappedMessage);
+            messageText.setString(to_sf_string(wrappedMessage));
             messageText.setPosition({panelX + 20.0f, currentY});
             window.draw(messageText);
 
-            // Count newlines to calculate height
             int numLines = 1;
             for (char c : wrappedMessage) {
                 if (c == '\n') numLines++;
             }
-            currentY += lineHeight * numLines + 10.0f; // Add spacing between entries
+            currentY += lineHeight * numLines + 10.0f;
 
             entriesDrawn++;
-            ++it; // Move to next entry in SinglyLinkedList
+            ++it;
         }
     }
 
-    // Footer with stats
-    sf::Text footerText(font);
+    sf::Text footerText;
+    footerText.setFont(font);
     footerText.setCharacterSize(11);
     footerText.setFillColor(sf::Color(180, 180, 180));
     footerText.setString("Total entries: " + to_string(conversationLog.length()));

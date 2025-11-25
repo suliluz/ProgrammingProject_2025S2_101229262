@@ -10,17 +10,18 @@
 
 using namespace std;
 
+// Helper to convert std::string (UTF-8) to sf::String
+sf::String to_sf_string_ingame(const std::string& s) {
+    return sf::String::fromUtf8(s.begin(), s.end());
+}
+
 InGameState::InGameState(GameEngine& game)
     : GameState(game),
       dialogueVisitor(game.getWindow()),
       currentDialogueNode(nullptr),
       currentNodeId("root"),
       showMenu(false),
-      hoveredButton(-1),
-      saveButtonText(uiFont),
-      loadButtonText(uiFont),
-      exitButtonText(uiFont),
-      backButtonText(uiFont) {
+      hoveredButton(-1) {
     cout << "InGameState constructor start" << endl;
 
     // Load UI font
@@ -42,7 +43,8 @@ InGameState::InGameState(GameEngine& game)
     backButton.setOutlineColor(sf::Color(150, 120, 200));
     backButton.setOutlineThickness(2);
 
-    backButtonText.setString("Back");
+    backButtonText.setFont(uiFont);
+    backButtonText.setString(to_sf_string_ingame("Back"));
     backButtonText.setCharacterSize(18);
     backButtonText.setFillColor(sf::Color::White);
     backButtonText.setPosition({backButton.getPosition().x + 20, backButton.getPosition().y + 7});
@@ -54,7 +56,8 @@ InGameState::InGameState(GameEngine& game)
     saveButton.setOutlineColor(sf::Color(100, 150, 200));
     saveButton.setOutlineThickness(2);
 
-    saveButtonText.setString("Save");
+    saveButtonText.setFont(uiFont);
+    saveButtonText.setString(to_sf_string_ingame("Save"));
     saveButtonText.setCharacterSize(18);
     saveButtonText.setFillColor(sf::Color::White);
     saveButtonText.setPosition({saveButton.getPosition().x + 20, saveButton.getPosition().y + 7});
@@ -66,7 +69,8 @@ InGameState::InGameState(GameEngine& game)
     loadButton.setOutlineColor(sf::Color(100, 150, 200));
     loadButton.setOutlineThickness(2);
 
-    loadButtonText.setString("Load");
+    loadButtonText.setFont(uiFont);
+    loadButtonText.setString(to_sf_string_ingame("Load"));
     loadButtonText.setCharacterSize(18);
     loadButtonText.setFillColor(sf::Color::White);
     loadButtonText.setPosition({loadButton.getPosition().x + 20, loadButton.getPosition().y + 7});
@@ -78,7 +82,8 @@ InGameState::InGameState(GameEngine& game)
     exitButton.setOutlineColor(sf::Color(200, 100, 100));
     exitButton.setOutlineThickness(2);
 
-    exitButtonText.setString("Exit");
+    exitButtonText.setFont(uiFont);
+    exitButtonText.setString(to_sf_string_ingame("Exit"));
     exitButtonText.setCharacterSize(18);
     exitButtonText.setFillColor(sf::Color::White);
     exitButtonText.setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
@@ -124,11 +129,7 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
       currentDialogueNode(nullptr),
       currentNodeId(startNodeId),
       showMenu(false),
-      hoveredButton(-1),
-      saveButtonText(uiFont),
-      loadButtonText(uiFont),
-      exitButtonText(uiFont),
-      backButtonText(uiFont) {
+      hoveredButton(-1) {
 
     if (!uiFont.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading UI font" << endl;
@@ -146,7 +147,8 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
     backButton.setFillColor(sf::Color(100, 80, 140, 200));
     backButton.setOutlineColor(sf::Color(150, 120, 200));
     backButton.setOutlineThickness(2);
-    backButtonText.setString("Back");
+    backButtonText.setFont(uiFont);
+    backButtonText.setString(to_sf_string_ingame("Back"));
     backButtonText.setCharacterSize(18);
     backButtonText.setFillColor(sf::Color::White);
     backButtonText.setPosition({backButton.getPosition().x + 20, backButton.getPosition().y + 7});
@@ -156,7 +158,8 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
     saveButton.setFillColor(sf::Color(60, 100, 140, 200));
     saveButton.setOutlineColor(sf::Color(100, 150, 200));
     saveButton.setOutlineThickness(2);
-    saveButtonText.setString("Save");
+    saveButtonText.setFont(uiFont);
+    saveButtonText.setString(to_sf_string_ingame("Save"));
     saveButtonText.setCharacterSize(18);
     saveButtonText.setFillColor(sf::Color::White);
     saveButtonText.setPosition({saveButton.getPosition().x + 20, saveButton.getPosition().y + 7});
@@ -166,7 +169,8 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
     loadButton.setFillColor(sf::Color(60, 100, 140, 200));
     loadButton.setOutlineColor(sf::Color(100, 150, 200));
     loadButton.setOutlineThickness(2);
-    loadButtonText.setString("Load");
+    loadButtonText.setFont(uiFont);
+    loadButtonText.setString(to_sf_string_ingame("Load"));
     loadButtonText.setCharacterSize(18);
     loadButtonText.setFillColor(sf::Color::White);
     loadButtonText.setPosition({loadButton.getPosition().x + 20, loadButton.getPosition().y + 7});
@@ -176,7 +180,8 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
     exitButton.setFillColor(sf::Color(140, 60, 60, 200));
     exitButton.setOutlineColor(sf::Color(200, 100, 100));
     exitButton.setOutlineThickness(2);
-    exitButtonText.setString("Exit");
+    exitButtonText.setFont(uiFont);
+    exitButtonText.setString(to_sf_string_ingame("Exit"));
     exitButtonText.setCharacterSize(18);
     exitButtonText.setFillColor(sf::Color::White);
     exitButtonText.setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
