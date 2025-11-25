@@ -6,6 +6,7 @@
 #include "SettingsState.h"
 #include "game/SaveSystem.h"
 #include <SFML/Window/Event.hpp>
+#include "List.h"
 #include "AssetPaths.h"
 
 using namespace std;
@@ -26,8 +27,8 @@ MainMenuState::MainMenuState(GameEngine& game) : GameState(game), title(nullptr)
     title->setPosition({300, 100});
 
     // List data structure: Create menu options
-    vector<string> items = {"New Game", "Load Game", "Settings", "Exit"};
-    for (int i = 0; i < items.size(); ++i) {
+    List<string> items = {"New Game", "Load Game", "Settings", "Exit"};
+    for (int i = 0; i < items.length(); ++i) {
         sf::Text* text = new sf::Text(font, items[i], 30);
         text->setFillColor(sf::Color::White);
         text->setPosition({350, 200.f + i * 50.f});
