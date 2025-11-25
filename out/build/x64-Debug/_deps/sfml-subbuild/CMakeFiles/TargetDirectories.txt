@@ -1,0 +1,3 @@
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/CMakeFiles/sfml-populate.dir
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/CMakeFiles/edit_cache.dir
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/CMakeFiles/rebuild_cache.dir

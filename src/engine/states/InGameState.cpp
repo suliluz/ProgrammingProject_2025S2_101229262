@@ -1,16 +1,14 @@
 #include <iostream>
-#include <algorithm> // For min() function
+#include <algorithm>
 #include "InGameState.h"
 #include "MainMenuState.h"
 #include "LoadGameState.h"
 #include "GameEngine.h"
 #include "game/SaveSystem.h"
-#include <optional>
 #include <SFML/Window/Event.hpp>
 
 using namespace std;
 
-// Helper to convert std::string (UTF-8) to sf::String
 sf::String to_sf_string_ingame(const std::string& s) {
     return sf::String::fromUtf8(s.begin(), s.end());
 }
@@ -24,78 +22,71 @@ InGameState::InGameState(GameEngine& game)
       hoveredButton(-1) {
     cout << "InGameState constructor start" << endl;
 
-    // Load UI font
     if (!uiFont.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading UI font" << endl;
     }
 
-    // Initialize UI buttons (positioned at top right)
+    saveButtonText = new sf::Text(uiFont);
+    loadButtonText = new sf::Text(uiFont);
+    exitButtonText = new sf::Text(uiFont);
+    backButtonText = new sf::Text(uiFont);
+
     sf::Vector2u windowSize = game.getWindow().getSize();
     float buttonWidth = 80.0f;
     float buttonHeight = 35.0f;
     float buttonMargin = 10.0f;
     float topMargin = 10.0f;
 
-    // Back button (leftmost) - Uses Stack for undo
     backButton.setSize({buttonWidth, buttonHeight});
     backButton.setPosition({windowSize.x - (buttonWidth + buttonMargin) * 4, topMargin});
     backButton.setFillColor(sf::Color(100, 80, 140, 200));
     backButton.setOutlineColor(sf::Color(150, 120, 200));
     backButton.setOutlineThickness(2);
 
-    backButtonText.setFont(uiFont);
-    backButtonText.setString(to_sf_string_ingame("Back"));
-    backButtonText.setCharacterSize(18);
-    backButtonText.setFillColor(sf::Color::White);
-    backButtonText.setPosition({backButton.getPosition().x + 20, backButton.getPosition().y + 7});
+    backButtonText->setString(to_sf_string_ingame("Back"));
+    backButtonText->setCharacterSize(18);
+    backButtonText->setFillColor(sf::Color::White);
+    backButtonText->setPosition({backButton.getPosition().x + 20, backButton.getPosition().y + 7});
 
-    // Save button
     saveButton.setSize({buttonWidth, buttonHeight});
     saveButton.setPosition({windowSize.x - (buttonWidth + buttonMargin) * 3, topMargin});
     saveButton.setFillColor(sf::Color(60, 100, 140, 200));
     saveButton.setOutlineColor(sf::Color(100, 150, 200));
     saveButton.setOutlineThickness(2);
 
-    saveButtonText.setFont(uiFont);
-    saveButtonText.setString(to_sf_string_ingame("Save"));
-    saveButtonText.setCharacterSize(18);
-    saveButtonText.setFillColor(sf::Color::White);
-    saveButtonText.setPosition({saveButton.getPosition().x + 20, saveButton.getPosition().y + 7});
+    saveButtonText->setString(to_sf_string_ingame("Save"));
+    saveButtonText->setCharacterSize(18);
+    saveButtonText->setFillColor(sf::Color::White);
+    saveButtonText->setPosition({saveButton.getPosition().x + 20, saveButton.getPosition().y + 7});
 
-    // Load button
     loadButton.setSize({buttonWidth, buttonHeight});
     loadButton.setPosition({windowSize.x - (buttonWidth + buttonMargin) * 2, topMargin});
     loadButton.setFillColor(sf::Color(60, 100, 140, 200));
     loadButton.setOutlineColor(sf::Color(100, 150, 200));
     loadButton.setOutlineThickness(2);
 
-    loadButtonText.setFont(uiFont);
-    loadButtonText.setString(to_sf_string_ingame("Load"));
-    loadButtonText.setCharacterSize(18);
-    loadButtonText.setFillColor(sf::Color::White);
-    loadButtonText.setPosition({loadButton.getPosition().x + 20, loadButton.getPosition().y + 7});
+    loadButtonText->setString(to_sf_string_ingame("Load"));
+    loadButtonText->setCharacterSize(18);
+    loadButtonText->setFillColor(sf::Color::White);
+    loadButtonText->setPosition({loadButton.getPosition().x + 20, loadButton.getPosition().y + 7});
 
-    // Exit button
     exitButton.setSize({buttonWidth, buttonHeight});
     exitButton.setPosition({windowSize.x - (buttonWidth + buttonMargin), topMargin});
     exitButton.setFillColor(sf::Color(140, 60, 60, 200));
     exitButton.setOutlineColor(sf::Color(200, 100, 100));
     exitButton.setOutlineThickness(2);
 
-    exitButtonText.setFont(uiFont);
-    exitButtonText.setString(to_sf_string_ingame("Exit"));
-    exitButtonText.setCharacterSize(18);
-    exitButtonText.setFillColor(sf::Color::White);
-    exitButtonText.setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
+    exitButtonText->setString(to_sf_string_ingame("Exit"));
+    exitButtonText->setCharacterSize(18);
+    exitButtonText->setFillColor(sf::Color::White);
+    exitButtonText->setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
 
-    // Apply text speed from settings
     dialogueVisitor.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
     dialogueVisitor.setPlayer(&game.getPlayer());
 
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
         dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node) {
-            cout << "Dialogue start callback" << endl;
             if (node && !node->isEmpty()) {
                 currentDialogueNode = node;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
@@ -105,19 +96,14 @@ InGameState::InGameState(GameEngine& game)
         });
 
         auto* rootNode = dialogueGraph->buildTree();
-        cout << "Tree built" << endl;
         if (rootNode) {
             game.getPlayer().displayStatus();
             if (rootNode && !rootNode->isEmpty()) {
                 currentDialogueNode = rootNode;
-                cout << "Accepting visitor" << endl;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
-                cout << "Visitor accepted" << endl;
             } else {
                 currentDialogueNode = nullptr;
             }
-        } else {
-            cerr << "Failed to build dialogue tree!" << endl;
         }
     }
     cout << "InGameState constructor end" << endl;
@@ -135,56 +121,56 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
         cerr << "Error loading UI font" << endl;
     }
 
+    saveButtonText = new sf::Text(uiFont);
+    loadButtonText = new sf::Text(uiFont);
+    exitButtonText = new sf::Text(uiFont);
+    backButtonText = new sf::Text(uiFont);
+
     sf::Vector2u windowSize = game.getWindow().getSize();
     float buttonWidth = 80.0f;
     float buttonHeight = 35.0f;
     float buttonMargin = 10.0f;
     float topMargin = 10.0f;
 
-    // Back button (leftmost) - Uses Stack for undo
     backButton.setSize({buttonWidth, buttonHeight});
     backButton.setPosition({windowSize.x - (buttonWidth + buttonMargin) * 4, topMargin});
     backButton.setFillColor(sf::Color(100, 80, 140, 200));
     backButton.setOutlineColor(sf::Color(150, 120, 200));
     backButton.setOutlineThickness(2);
-    backButtonText.setFont(uiFont);
-    backButtonText.setString(to_sf_string_ingame("Back"));
-    backButtonText.setCharacterSize(18);
-    backButtonText.setFillColor(sf::Color::White);
-    backButtonText.setPosition({backButton.getPosition().x + 20, backButton.getPosition().y + 7});
+    backButtonText->setString(to_sf_string_ingame("Back"));
+    backButtonText->setCharacterSize(18);
+    backButtonText->setFillColor(sf::Color::White);
+    backButtonText->setPosition({backButton.getPosition().x + 20, backButton.getPosition().y + 7});
 
     saveButton.setSize({buttonWidth, buttonHeight});
     saveButton.setPosition({windowSize.x - (buttonWidth + buttonMargin) * 3, topMargin});
     saveButton.setFillColor(sf::Color(60, 100, 140, 200));
     saveButton.setOutlineColor(sf::Color(100, 150, 200));
     saveButton.setOutlineThickness(2);
-    saveButtonText.setFont(uiFont);
-    saveButtonText.setString(to_sf_string_ingame("Save"));
-    saveButtonText.setCharacterSize(18);
-    saveButtonText.setFillColor(sf::Color::White);
-    saveButtonText.setPosition({saveButton.getPosition().x + 20, saveButton.getPosition().y + 7});
+    saveButtonText->setString(to_sf_string_ingame("Save"));
+    saveButtonText->setCharacterSize(18);
+    saveButtonText->setFillColor(sf::Color::White);
+    saveButtonText->setPosition({saveButton.getPosition().x + 20, saveButton.getPosition().y + 7});
 
     loadButton.setSize({buttonWidth, buttonHeight});
     loadButton.setPosition({windowSize.x - (buttonWidth + buttonMargin) * 2, topMargin});
     loadButton.setFillColor(sf::Color(60, 100, 140, 200));
     loadButton.setOutlineColor(sf::Color(100, 150, 200));
     loadButton.setOutlineThickness(2);
-    loadButtonText.setFont(uiFont);
-    loadButtonText.setString(to_sf_string_ingame("Load"));
-    loadButtonText.setCharacterSize(18);
-    loadButtonText.setFillColor(sf::Color::White);
-    loadButtonText.setPosition({loadButton.getPosition().x + 20, loadButton.getPosition().y + 7});
+    loadButtonText->setString(to_sf_string_ingame("Load"));
+    loadButtonText->setCharacterSize(18);
+    loadButtonText->setFillColor(sf::Color::White);
+    loadButtonText->setPosition({loadButton.getPosition().x + 20, loadButton.getPosition().y + 7});
 
     exitButton.setSize({buttonWidth, buttonHeight});
     exitButton.setPosition({windowSize.x - (buttonWidth + buttonMargin), topMargin});
     exitButton.setFillColor(sf::Color(140, 60, 60, 200));
     exitButton.setOutlineColor(sf::Color(200, 100, 100));
     exitButton.setOutlineThickness(2);
-    exitButtonText.setFont(uiFont);
-    exitButtonText.setString(to_sf_string_ingame("Exit"));
-    exitButtonText.setCharacterSize(18);
-    exitButtonText.setFillColor(sf::Color::White);
-    exitButtonText.setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
+    exitButtonText->setString(to_sf_string_ingame("Exit"));
+    exitButtonText->setCharacterSize(18);
+    exitButtonText->setFillColor(sf::Color::White);
+    exitButtonText->setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
 
     dialogueVisitor.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
     dialogueVisitor.setPlayer(&game.getPlayer());
@@ -195,8 +181,6 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
             if (node && !node->isEmpty()) {
                 currentDialogueNode = node;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
-            } else {
-                currentDialogueNode = nullptr;
             }
         });
 
@@ -211,40 +195,38 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
                 if (loadNode && !loadNode->isEmpty()) {
                     currentDialogueNode = loadNode;
                     currentDialogueNode->getKey().accept(dialogueVisitor);
-                } else {
-                    cerr << "Failed to find node: " << startNodeId << " - Falling back to root" << endl;
-                    currentDialogueNode = rootNode;
-                    currentDialogueNode->getKey().accept(dialogueVisitor);
                 }
             }
         }
     }
 }
 
+InGameState::~InGameState() {
+    delete saveButtonText;
+    delete loadButtonText;
+    delete exitButtonText;
+    delete backButtonText;
+}
+
 void InGameState::handleInput() {
     while (const auto event = game.getWindow().pollEvent()) {
-        cout << "Event polled" << endl;
         if (event->is<sf::Event::Closed>()) {
             game.getWindow().close();
         }
 
-        // Handle save with F5
         if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
             if (keyPressed->code == sf::Keyboard::Key::F5) {
                 saveGame();
             }
-            // ESC to toggle menu
             if (keyPressed->code == sf::Keyboard::Key::Escape) {
                 showMenu = !showMenu;
             }
         }
 
-        // Handle mouse clicks on UI buttons
         if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
             if (mouseButtonPressed->button == sf::Mouse::Button::Left) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(game.getWindow());
 
-                // Stack-based undo: Go back to previous dialogue node
                 if (isMouseOverButton(backButton, mousePos)) {
                     undoLastChoice();
                 } else if (isMouseOverButton(saveButton, mousePos)) {
@@ -267,7 +249,6 @@ void InGameState::update(float dt) {
     sf::Vector2i mousePos = sf::Mouse::getPosition(game.getWindow());
     hoveredButton = -1;
 
-    // Check button hover states
     if (isMouseOverButton(backButton, mousePos)) {
         hoveredButton = 3;
     } else if (isMouseOverButton(saveButton, mousePos)) {
@@ -278,12 +259,10 @@ void InGameState::update(float dt) {
         hoveredButton = 2;
     }
 
-    // Update dialogue visitor for text animation
     if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
         dialogueVisitor.update(sf::seconds(dt));
     }
 
-    // Queue data structure: Update delayed action system
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
         dialogueGraph->update(dt);
@@ -295,27 +274,22 @@ void InGameState::render(sf::RenderWindow& window) {
         dialogueVisitor.render();
     }
 
-    // Draw UI buttons
     drawUIButtons();
 }
 
 void InGameState::saveGame() {
     cout << "Saving game to slot 0..." << endl;
     if (SaveSystem::saveToSlot(game.getPlayer(), currentNodeId, 0)) {
-        cout << "Game saved successfully to slot 0!" << endl;
-    } else {
-        cerr << "Failed to save game!" << endl;
+        cout << "Game saved successfully!" << endl;
     }
 }
 
 void InGameState::drawUIButtons() {
-    // Apply hover effect to all buttons including back button
     sf::RectangleShape* buttons[] = {&saveButton, &loadButton, &exitButton, &backButton};
-    sf::Text* buttonTexts[] = {&saveButtonText, &loadButtonText, &exitButtonText, &backButtonText};
+    sf::Text* buttonTexts[] = {saveButtonText, loadButtonText, exitButtonText, backButtonText};
 
     for (int i = 0; i < 4; ++i) {
-        if (hoveredButton == i || (i == 3 && hoveredButton == 3)) {
-            // Brighten button on hover
+        if (hoveredButton == i) {
             sf::Color baseColor = buttons[i]->getFillColor();
             buttons[i]->setFillColor(sf::Color(
                 min(255, static_cast<int>(baseColor.r) + 30),
@@ -325,20 +299,14 @@ void InGameState::drawUIButtons() {
             ));
             buttons[i]->setOutlineThickness(3);
         } else {
-            // Restore original colors
-            if (i == 0) {  // Save button
+            if (i == 0 || i == 1) {
                 buttons[i]->setFillColor(sf::Color(60, 100, 140, 200));
-                buttons[i]->setOutlineThickness(2);
-            } else if (i == 1) {  // Load button
-                buttons[i]->setFillColor(sf::Color(60, 100, 140, 200));
-                buttons[i]->setOutlineThickness(2);
-            } else if (i == 2) {  // Exit button
+            } else if (i == 2) {
                 buttons[i]->setFillColor(sf::Color(140, 60, 60, 200));
-                buttons[i]->setOutlineThickness(2);
-            } else {  // Back button
+            } else {
                 buttons[i]->setFillColor(sf::Color(100, 80, 140, 200));
-                buttons[i]->setOutlineThickness(2);
             }
+            buttons[i]->setOutlineThickness(2);
         }
 
         game.getWindow().draw(*buttons[i]);
@@ -354,42 +322,32 @@ bool InGameState::isMouseOverButton(const sf::RectangleShape& button, const sf::
            mousePos.y >= buttonPos.y && mousePos.y <= buttonPos.y + buttonSize.y;
 }
 
-// Stack data structure utilization: Navigate to node and track history
 void InGameState::navigateToNode(const string& nodeId) {
-    // Push current node to history stack before navigating away
     dialogueHistory.push(currentNodeId);
     currentNodeId = nodeId;
 
-    // Load and display the new node
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
         auto* node = dialogueGraph->getNode(nodeId);
         if (node && !node->isEmpty()) {
             currentDialogueNode = node;
             currentDialogueNode->getKey().accept(dialogueVisitor);
-            cout << "Navigated to node: " << nodeId << " (history size: " << dialogueHistory.size() << ")" << endl;
         }
     }
 }
 
-// Stack data structure utilization: Undo last choice and return to previous dialogue
 void InGameState::undoLastChoice() {
-    // Pop from history stack to go back
     if (!dialogueHistory.isEmpty()) {
         string previousNodeId = dialogueHistory.pop();
         currentNodeId = previousNodeId;
 
-        // Load and display the previous node
         auto* dialogueGraph = game.getDialogueGraph();
         if (dialogueGraph) {
             auto* node = dialogueGraph->getNode(previousNodeId);
             if (node && !node->isEmpty()) {
                 currentDialogueNode = node;
                 currentDialogueNode->getKey().accept(dialogueVisitor);
-                cout << "Went back to node: " << previousNodeId << " (history size: " << dialogueHistory.size() << ")" << endl;
             }
         }
-    } else {
-        cout << "Cannot go back - no history available!" << endl;
     }
 }

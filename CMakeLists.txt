@@ -50,9 +50,6 @@ set(GAME_SOURCES
 
 add_executable(${PROJECT_NAME} ${GAME_SOURCES})
 
-# Test executable for Stack and Queue
-add_executable(test_stack_queue test_stack_queue.cpp)
-
 # Copy assets directory to the build directory
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 

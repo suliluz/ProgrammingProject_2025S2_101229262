@@ -15,6 +15,7 @@ class InGameState : public GameState {
 public:
     explicit InGameState(GameEngine& game);
     explicit InGameState(GameEngine& game, const string& startNodeId);  // Load from saved node
+    ~InGameState() override;
 
     void handleInput() override;
     void update(float dt) override;
@@ -42,10 +43,10 @@ private:
     sf::RectangleShape loadButton;
     sf::RectangleShape exitButton;
     sf::RectangleShape backButton; // Back button for undo
-    sf::Text saveButtonText;
-    sf::Text loadButtonText;
-    sf::Text exitButtonText;
-    sf::Text backButtonText;
+    sf::Text* saveButtonText;
+    sf::Text* loadButtonText;
+    sf::Text* exitButtonText;
+    sf::Text* backButtonText;
 
     bool showMenu;
     int hoveredButton; // -1 = none, 0 = save, 1 = load, 2 = exit, 3 = back

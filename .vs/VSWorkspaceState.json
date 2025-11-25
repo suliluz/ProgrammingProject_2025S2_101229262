@@ -1,0 +1,21 @@
+{
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "out\\build\\x64-Debug",
+      "out\\install\\x64-Debug"
+    ]
+  },
+  "ExpandedNodes": [
+    "",
+    "\\assets",
+    "\\assets\\dialogues",
+    "\\base",
+    "\\base\\headers",
+    "\\src",
+    "\\src\\engine",
+    "\\src\\engine\\states",
+    "\\src\\game"
+  ],
+  "SelectedNode": "\\src\\engine\\states\\InGameState.cpp",
+  "PreviewInSolutionExplorer": false
+}

@@ -1,0 +1,14 @@
+# Target labels
+ sfml-populate
+# Source files and their labels
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/CMakeFiles/sfml-populate
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/CMakeFiles/sfml-populate.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/CMakeFiles/sfml-populate-complete.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-build.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-configure.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-download.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-install.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-mkdir.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-patch.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-test.rule
+C:/Users/marri/source/repos/ProgrammingProject_2025S2_101229262/out/build/x64-Debug/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-update.rule
