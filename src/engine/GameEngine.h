@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <memory>
 #include "dialogue/DialogueGraph.h"
 #include "game/Player.h"
@@ -28,6 +29,7 @@ private:
     void update(sf::Time deltaTime);
     void render();
     void loadDialogues();
+    void loadMusic();
 
     sf::RenderWindow window;
     unique_ptr<GameState> currentState;
@@ -36,4 +38,5 @@ private:
     Player player;
     DialogueGraph* dialogueGraph;
     Settings settings;
+    sf::Music backgroundMusic;
 };

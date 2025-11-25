@@ -16,6 +16,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SFML)
 
 set(SFML_LIBS
+        SFML::Audio
         SFML::Graphics
         SFML::Window
         SFML::System

@@ -24,6 +24,9 @@ GameEngine::GameEngine() : currentState(nullptr), pendingState(nullptr), player(
 
     // Load dialogues
     loadDialogues();
+
+    // Load and play background music
+    loadMusic();
 }
 
 void GameEngine::loadDialogues() {
@@ -40,13 +43,35 @@ void GameEngine::loadDialogues() {
     }
 }
 
+void GameEngine::loadMusic() {
+    // Load background music from assets folder
+    string musicPath = string(ASSETS_PATH) + "Honami-city.mp3";
+    if (!backgroundMusic.openFromFile(musicPath)) {
+        cerr << "Warning: Could not load background music from " << musicPath << endl;
+        return;
+    }
+
+    // Set music to loop continuously
+    backgroundMusic.setLooping(true);
+
+    // Set volume (0-100, default is 100)
+    backgroundMusic.setVolume(50); // Set to 50% volume, adjust as needed
+
+    // Start playing the music
+    backgroundMusic.play();
+
+    cout << "Background music loaded and playing!" << endl;
+}
+
 GameEngine::~GameEngine() {
+    // Stop music before cleanup
+    backgroundMusic.stop();
     delete dialogueGraph;
 }
 
 void GameEngine::changeState(unique_ptr<GameState> state) {
     // Accept any GameState-derived class (MainMenu, InGame, etc.)
-    pendingState = move(state);
+    pendingState = std::move(state);
 }
 
 void GameEngine::run() {
@@ -56,7 +81,7 @@ void GameEngine::run() {
 
         // Swap to pending state (state pattern implementation)
         if (pendingState) {
-            currentState = move(pendingState);
+            currentState = std::move(pendingState);
             pendingState = nullptr;
         }
 

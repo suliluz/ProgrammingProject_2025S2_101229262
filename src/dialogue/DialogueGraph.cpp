@@ -11,7 +11,7 @@ DialogueGraph::Action::Action() : type(END_DIALOGUE), intParam(0) {}
 DialogueGraph::Action::Action(Type t, int val) : type(t), intParam(val) {}
 
 DialogueGraph::Action::Action(Type t, string str, int val)
-    : type(t), stringParam(std::move(str)), intParam(val) {}
+    : type(t), stringParam(move(str)), intParam(val) {}
 
 DialogueGraph::ChoiceInfo::ChoiceInfo() : actions(), condition(List<string>{})
 {}
@@ -52,7 +52,7 @@ DialogueGraph::~DialogueGraph() {
 }
 
 void DialogueGraph::setDialogueStartCallback(function<void(NTree<Dialogue, MAX_CHOICES>*)> callback) {
-    onDialogueStart = std::move(callback);
+    onDialogueStart = move(callback);
 }
 
 bool DialogueGraph::loadFromFile(const string& filename) {
