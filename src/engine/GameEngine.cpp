@@ -45,6 +45,7 @@ GameEngine::~GameEngine() {
 }
 
 void GameEngine::changeState(unique_ptr<GameState> state) {
+    // Accept any GameState-derived class (MainMenu, InGame, etc.)
     pendingState = move(state);
 }
 
@@ -53,6 +54,7 @@ void GameEngine::run() {
     while (window.isOpen()) {
         sf::Time deltaTime = clock.restart();
 
+        // Swap to pending state (state pattern implementation)
         if (pendingState) {
             currentState = move(pendingState);
             pendingState = nullptr;
@@ -65,12 +67,14 @@ void GameEngine::run() {
 }
 
 void GameEngine::processEvents() {
+    // Calls derived class's handleInput() via virtual dispatch
     if (currentState) {
         currentState->handleInput();
     }
 }
 
 void GameEngine::update(sf::Time deltaTime) {
+    // Calls derived class's update() via virtual dispatch
     if (currentState) {
         currentState->update(deltaTime.asSeconds());
     }
@@ -78,6 +82,7 @@ void GameEngine::update(sf::Time deltaTime) {
 
 void GameEngine::render() {
     window.clear();
+    // Calls derived class's render() via virtual dispatch
     if (currentState) {
         currentState->render(window);
     }

@@ -21,7 +21,7 @@ DialogueGraph::NodeInfo::NodeInfo() = default;
 DialogueGraph::DialogueGraph(Player& player) : rootNodeId("root"), playerRef(&player), rootTree(nullptr) {}
 
 DialogueGraph::~DialogueGraph() {
-    // Clean up NodeInfo objects
+    // Iterate through all NodeInfo objects for cleanup
     auto nodeInfoIt = allNodeInfos.getIterator();
     auto nodeInfoEnd = nodeInfoIt.end();
     while (nodeInfoIt != nodeInfoEnd) {
@@ -29,7 +29,7 @@ DialogueGraph::~DialogueGraph() {
         ++nodeInfoIt;
     }
 
-    // Clean up all NTree nodes (they are independent, not in a parent-child hierarchy)
+    // Iterate through all tree nodes for cleanup
     auto treeIt = allTreeNodes.getIterator();
     auto treeEnd = treeIt.end();
     while (treeIt != treeEnd) {
@@ -37,10 +37,11 @@ DialogueGraph::~DialogueGraph() {
         ++treeIt;
     }
 
-    // Clean up the file node data
+    // Clean up nested hash tables by iterating through file list
     auto fileIt = allFiles.getIterator();
     auto endFileIt = fileIt.end();
     while (fileIt != endFileIt) {
+        // Search for inner hash table and delete it
         auto** fileNodes = fileNodeData.search(fileIt.getCurrent()->getValue());
         if (fileNodes) {
             delete *fileNodes;
@@ -68,17 +69,18 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildTree() {
 }
 
 NTree<Dialogue, MAX_CHOICES>* DialogueGraph::getNode(const string& nodeId) {
+    // O(1) lookup in built nodes cache
     auto* result = builtNodes.search(nodeId);
     if (result) {
-        return *result;
+        return *result; // Cache hit - return existing tree node
     }
-    // If not built yet, build it on demand (needed for loading saved games)
+    // Cache miss - build node on demand (needed for loading saved games)
     return buildNode(nodeId);
 }
 
 bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
     if (isFirstFile) {
-        // Clean up existing data
+        // Clean up existing data before loading new file
         auto nodeInfoIt = allNodeInfos.getIterator();
         auto nodeInfoEnd = nodeInfoIt.end();
         while (nodeInfoIt != nodeInfoEnd) {
@@ -86,7 +88,8 @@ bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
             ++nodeInfoIt;
         }
         allNodeInfos.clear();
-        
+
+        // Delete all nested hash tables
         auto fileIt = allFiles.getIterator();
         auto endFileIt = fileIt.end();
         while (fileIt != endFileIt) {
@@ -106,7 +109,9 @@ bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
         return false;
     }
 
+    // Track this file for later iteration
     allFiles.push(filename);
+    // Create inner hash table for this file's nodes
     auto* currentFileNodes = new HashTable<string, NodeInfo*>();
     fileNodeData.insert(filename, currentFileNodes);
 
@@ -120,12 +125,12 @@ bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
         if (line.empty() || line[0] == '#') continue;
 
         if (line.rfind("NODE:", 0) == 0) {
-            // Save previous node
+            // Insert previous node into this file's hash table
             if (currentNode) {
                 currentFileNodes->insert(currentNode->nodeId, currentNode);
             }
 
-            // Start new node
+            // Create new node for parsing
             currentNode = new NodeInfo();
             currentNode->nodeId = trim(line.substr(5));
             allNodeInfos.push(currentNode);  // Track for cleanup
@@ -138,7 +143,7 @@ bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
         }
         else if (line.rfind("CHOICE:", 0) == 0 && currentNode) {
             ChoiceInfo choice = parseChoice(line.substr(7));
-            currentNode->choices.push(choice);
+            currentNode->choices.push(choice); // Add choice to node
         }
         else if (line.rfind("ROOT:", 0) == 0 && isFirstFile) {
             rootNodeId = trim(line.substr(5));
@@ -155,17 +160,21 @@ bool DialogueGraph::loadFile(const string& filename, bool isFirstFile) {
 }
 
 NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
+    // Check if node already built (cache lookup)
     auto* existing = builtNodes.search(nodeId);
     if (existing) {
-        return *existing;
+        return *existing; // Return cached tree node
     }
 
+    // Find node data across all loaded files (nested hash table search)
     NodeInfo* data = nullptr;
     auto fileIt = allFiles.getIterator();
     auto endFileIt = fileIt.end();
     while (fileIt != endFileIt) {
+        // Get inner hash table for this file
         auto** fileNodes = fileNodeData.search(fileIt.getCurrent()->getValue());
         if (fileNodes) {
+            // Search for node in this file's hash table
             auto* dataPtr = (*fileNodes)->search(nodeId);
             if (dataPtr) {
                 data = *dataPtr;
@@ -180,20 +189,24 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
         return nullptr;
     }
 
+    // Create dialogue data for tree node
     Dialogue dialogue;
     dialogue.speaker = data->speaker;
     dialogue.message = data->message;
 
+    // Create new N-ary tree node with dialogue data
     auto* node = new NTree<Dialogue, MAX_CHOICES>(dialogue);
-    builtNodes.insert(nodeId, node);
-    allTreeNodes.push(node);
+    builtNodes.insert(nodeId, node); // Cache this built node
+    allTreeNodes.push(node); // Track for cleanup
 
+    // Iterate through choices and build child nodes recursively
     auto choiceIt = data->choices.getIterator();
     auto endIt = choiceIt.end();
 
     while (choiceIt != endIt) {
         ChoiceInfo& choiceInfo = choiceIt.getCurrent()->getValue();
 
+        // Recursively build child nodes for branching narrative
         NTree<Dialogue, MAX_CHOICES>* targetNode = nullptr;
         if (!choiceInfo.targetNodeId.empty()) {
             targetNode = buildNode(choiceInfo.targetNodeId);
@@ -203,7 +216,7 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
         choice.text = choiceInfo.text;
         choice.action = createAction(choiceInfo, targetNode);
 
-        node->getKey().choices.push(choice);
+        node->getKey().choices.push(choice); // Add choice to dialogue
 
         ++choiceIt;
     }
@@ -212,26 +225,30 @@ NTree<Dialogue, MAX_CHOICES>* DialogueGraph::buildNode(const string& nodeId) {
 }
 
 function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree<Dialogue, MAX_CHOICES>* targetNode) {
+    // Lambda captures choice data and creates callable action
     return [this, choiceInfo, targetNode]() {
+        // Check all conditions before executing actions
         auto condIt = const_cast<List<string>&>(choiceInfo.condition).getIterator();
         auto condEnd = const_cast<List<string>&>(choiceInfo.condition).getIterator().end();
         while (condIt != condEnd) {
             if (!evaluateCondition(condIt.getCurrent()->getValue())) {
                 cout << "Condition not met: " << condIt.getCurrent()->getValue() << endl;
-                return;
+                return; // Condition failed - abort action
             }
             ++condIt;
         }
 
+        // Execute all actions sequentially (gold, items, XP, etc.)
         auto actionIt = const_cast<List<Action>&>(choiceInfo.actions).getIterator();
         auto endIt = actionIt.end();
 
         while (actionIt != endIt) {
             Action& action = actionIt.getCurrent()->getValue();
-            executeAction(action);
+            executeAction(action); // Modify player state
             ++actionIt;
         }
 
+        // Navigate to target node in dialogue tree
         if (targetNode && onDialogueStart) {
             onDialogueStart(targetNode);
         }
@@ -304,12 +321,14 @@ bool DialogueGraph::evaluateCondition(const string& condition) {
 }
 
 Item DialogueGraph::createItemFromString(const string& itemStr) {
+    // Split string returns list of parts
     List<string> parts = split(itemStr, ':');
 
     string name = "Unknown";
     ItemType type = ItemType::MISC;
     int bonus = 0;
 
+    // Parse item components from list (name:type:bonus)
     auto it = parts.getIterator();
     auto endIt = it.end();
     int index = 0;
@@ -331,6 +350,7 @@ Item DialogueGraph::createItemFromString(const string& itemStr) {
         ++index;
     }
 
+    // Create item with parsed data
     Item item(name, type, bonus);
 
     if (type == ItemType::WEAPON) {
@@ -358,7 +378,9 @@ ItemType DialogueGraph::stringToItemType(const string& typeStr) {
 DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
     ChoiceInfo info;
 
+    // Split choice line by '|' delimiter
     List<string> parts = split(choiceLine, '|');
+    // Parse each part of the choice definition
     auto it = parts.getIterator();
     auto endIt = it.end();
     bool first = true;
@@ -367,34 +389,34 @@ DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
         string part = trim(it.getCurrent()->getValue());
 
         if (first) {
-            info.text = part;
+            info.text = part; // First part is always the choice text
             first = false;
         }
         else if (part.rfind("target:", 0) == 0) {
-            info.targetNodeId = trim(part.substr(7));
+            info.targetNodeId = trim(part.substr(7)); // Set target node ID
         }
         else if (part.rfind("gold:", 0) == 0) {
             int amount = stoi(part.substr(5));
-            info.actions.push(Action(Action::GOLD, amount));
+            info.actions.push(Action(Action::GOLD, amount)); // Add action to list
         }
         else if (part.rfind("item:", 0) == 0) {
             string itemStr = part.substr(5);
-            info.actions.push(Action(Action::ITEM, itemStr, 0));
+            info.actions.push(Action(Action::ITEM, itemStr, 0)); // Add action to list
         }
         else if (part.rfind("xp:", 0) == 0) {
             int amount = stoi(part.substr(3));
-            info.actions.push(Action(Action::XP, amount));
+            info.actions.push(Action(Action::XP, amount)); // Add action to list
         }
         else if (part.rfind("health:", 0) == 0) {
             int amount = stoi(part.substr(7));
-            info.actions.push(Action(Action::HEALTH, amount));
+            info.actions.push(Action(Action::HEALTH, amount)); // Add action to list
         }
         else if (part.rfind("mana:", 0) == 0) {
             int amount = stoi(part.substr(5));
-            info.actions.push(Action(Action::MANA, amount));
+            info.actions.push(Action(Action::MANA, amount)); // Add action to list
         }
         else if (part.rfind("condition:", 0) == 0) {
-            info.condition.push(trim(part.substr(10)));
+            info.condition.push(trim(part.substr(10))); // Add condition to list
         }
 
         ++it;
@@ -411,13 +433,35 @@ string DialogueGraph::trim(const string& str) {
 }
 
 List<string> DialogueGraph::split(const string& str, char delimiter) {
-    List<string> result;
+    List<string> result; // Returns list of string parts
     stringstream ss(str);
     string item;
 
     while (getline(ss, item, delimiter)) {
-        result.push(item);
+        result.push(item); // Append each part to list
     }
 
     return result;
+}
+
+// Queue data structure utilization: Add action to delayed execution queue
+void DialogueGraph::queueAction(const Action& action, float delaySeconds) {
+    pendingActions.enqueue(DelayedAction(action, delaySeconds));
+    cout << "Queued action with " << delaySeconds << "s delay (queue size: " << pendingActions.size() << ")" << endl;
+}
+
+// Queue data structure utilization: Process delayed actions over time (FIFO)
+void DialogueGraph::update(float deltaTime) {
+    if (!pendingActions.isEmpty()) {
+        // Peek at front of queue without removing it yet
+        DelayedAction& frontAction = const_cast<DelayedAction&>(pendingActions.front());
+        frontAction.delaySeconds -= deltaTime;
+
+        // If delay expired, dequeue and execute
+        if (frontAction.delaySeconds <= 0) {
+            DelayedAction action = pendingActions.dequeue();
+            cout << "Executing delayed action (remaining in queue: " << pendingActions.size() << ")" << endl;
+            executeAction(action.action);
+        }
+    }
 }

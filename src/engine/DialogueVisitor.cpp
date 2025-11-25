@@ -1,10 +1,12 @@
 #include "DialogueVisitor.h"
 #include <iostream>
+#include <algorithm> // For min() and max() functions
 #include "game/Player.h"
 
 DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
     : window(win), baseCharacterInterval(sf::seconds(0.05f)), characterInterval(sf::seconds(0.05f)),
-      dialogueActive(false), selectedChoice(0), currentDialogue(nullptr), player(nullptr), showInventory(false) {
+      dialogueActive(false), selectedChoice(0), currentDialogue(nullptr), player(nullptr),
+      showInventory(false), showHistory(false) { // Initialize showHistory flag
     cout << "DialogueVisitor constructor start" << endl;
     if (!font.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading font" << endl;
@@ -38,6 +40,10 @@ void DialogueVisitor::visit(Dialogue& dialogue) {
     dialogueActive = true;
     currentDialogue = &dialogue;
     currentSpeaker = dialogue.speaker;
+
+    // SinglyLinkedList: Log this dialogue to conversation history
+    conversationLog.push(DialogueEntry(dialogue.speaker, dialogue.message));
+    cout << "Logged dialogue to history (total entries: " << conversationLog.length() << ")" << endl;
 
     // Update speaker name
     if (!currentSpeaker.empty()) {
@@ -217,6 +223,11 @@ void DialogueVisitor::render() {
     if (showInventory) {
         drawInventoryPanel();
     }
+
+    // SinglyLinkedList: Draw conversation history panel if toggled on
+    if (showHistory) {
+        drawHistoryPanel();
+    }
 }
 
 void DialogueVisitor::handleInput(const sf::Event& event) {
@@ -226,6 +237,12 @@ void DialogueVisitor::handleInput(const sf::Event& event) {
         // 'I' key to toggle inventory
         if (keyPressed->code == sf::Keyboard::Key::I) {
             toggleInventoryView();
+            return;
+        }
+
+        // 'H' key to toggle history (SinglyLinkedList conversation log)
+        if (keyPressed->code == sf::Keyboard::Key::H) {
+            toggleHistoryView();
             return;
         }
 
@@ -563,4 +580,96 @@ void DialogueVisitor::skipToEnd() {
 
 void DialogueVisitor::setTextSpeed(float speed) {
     characterInterval = sf::seconds(baseCharacterInterval.asSeconds() / speed);
+}
+
+// SinglyLinkedList data structure utilization: Draw conversation history panel
+void DialogueVisitor::drawHistoryPanel() {
+    if (!player) return;
+
+    sf::Vector2u windowSize = window.getSize();
+    float windowWidth = static_cast<float>(windowSize.x);
+    float windowHeight = static_cast<float>(windowSize.y);
+
+    // Panel positioning (centered on screen)
+    float panelWidth = min(800.0f, windowWidth - 40.0f);
+    float panelHeight = min(600.0f, windowHeight - 80.0f);
+    float panelX = (windowWidth - panelWidth) / 2.0f;
+    float panelY = (windowHeight - panelHeight) / 2.0f;
+
+    // Draw panel background
+    sf::RectangleShape panel({panelWidth, panelHeight});
+    panel.setPosition({panelX, panelY});
+    panel.setFillColor(sf::Color(0, 0, 0, 240));  // Almost opaque black
+    panel.setOutlineColor(sf::Color(200, 150, 100, 200));  // Gold outline for history
+    panel.setOutlineThickness(3);
+    window.draw(panel);
+
+    // Title
+    sf::Text historyTitle(font);
+    historyTitle.setCharacterSize(20);
+    historyTitle.setFillColor(sf::Color(255, 215, 0));  // Gold
+    historyTitle.setStyle(sf::Text::Bold);
+    historyTitle.setString("CONVERSATION HISTORY (Press H to close)");
+    historyTitle.setPosition({panelX + 15.0f, panelY + 10.0f});
+    window.draw(historyTitle);
+
+    float currentY = panelY + 45.0f;
+    float lineHeight = 18.0f;
+    int maxEntriesVisible = static_cast<int>((panelHeight - 60.0f) / (lineHeight * 3)); // Each entry ~3 lines
+
+    // SinglyLinkedList iteration: Display conversation log (forward-only traversal)
+    if (conversationLog.length() == 0) {
+        sf::Text emptyText(font);
+        emptyText.setCharacterSize(14);
+        emptyText.setFillColor(sf::Color(150, 150, 150));
+        emptyText.setString("No conversation history yet");
+        emptyText.setPosition({panelX + 20.0f, currentY + 100.0f});
+        window.draw(emptyText);
+    } else {
+        auto it = conversationLog.getIterator();
+        int entriesDrawn = 0;
+
+        // Forward iteration through SinglyLinkedList
+        while (it != conversationLog.getIterator().end() && entriesDrawn < maxEntriesVisible) {
+            const DialogueEntry& entry = it.getCurrent()->getValue();
+
+            // Speaker name
+            sf::Text speakerLabel(font);
+            speakerLabel.setCharacterSize(14);
+            speakerLabel.setFillColor(sf::Color(255, 200, 100));  // Gold-ish
+            speakerLabel.setStyle(sf::Text::Bold);
+            speakerLabel.setString(entry.speaker.empty() ? "..." : entry.speaker);
+            speakerLabel.setPosition({panelX + 15.0f, currentY});
+            window.draw(speakerLabel);
+
+            currentY += lineHeight;
+
+            // Message text (wrapped)
+            string wrappedMessage = wrapText(entry.message, panelWidth - 30.0f);
+            sf::Text messageText(font);
+            messageText.setCharacterSize(12);
+            messageText.setFillColor(sf::Color(220, 220, 220));
+            messageText.setString(wrappedMessage);
+            messageText.setPosition({panelX + 20.0f, currentY});
+            window.draw(messageText);
+
+            // Count newlines to calculate height
+            int numLines = 1;
+            for (char c : wrappedMessage) {
+                if (c == '\n') numLines++;
+            }
+            currentY += lineHeight * numLines + 10.0f; // Add spacing between entries
+
+            entriesDrawn++;
+            ++it; // Move to next entry in SinglyLinkedList
+        }
+    }
+
+    // Footer with stats
+    sf::Text footerText(font);
+    footerText.setCharacterSize(11);
+    footerText.setFillColor(sf::Color(180, 180, 180));
+    footerText.setString("Total entries: " + to_string(conversationLog.length()));
+    footerText.setPosition({panelX + 15.0f, panelY + panelHeight - 25.0f});
+    window.draw(footerText);
 }

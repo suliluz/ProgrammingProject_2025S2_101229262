@@ -1,6 +1,7 @@
 #pragma once
 #include "HashTable.h"
 #include "List.h"
+#include "Queue.h" // Queue data structure for delayed actions
 #include "NTree.h"
 #include "Dialogue.h"
 #include "game/Player.h"
@@ -25,6 +26,15 @@ public:
         Action();
         Action(Type t, int val);
         Action(Type t, string str, int val = 0);
+    };
+
+    // Queue data structure: For delayed action execution
+    struct DelayedAction {
+        Action action;
+        float delaySeconds;
+
+        DelayedAction() : delaySeconds(0.0f) {}
+        DelayedAction(const Action& act, float delay) : action(act), delaySeconds(delay) {}
     };
 
     struct ChoiceInfo {
@@ -56,6 +66,9 @@ private:
     function<void(NTree<Dialogue, MAX_CHOICES>*)> onDialogueStart;
     NTree<Dialogue, MAX_CHOICES>* rootTree;  // Reference to root (doesn't own)
 
+    // Queue data structure: Pending delayed actions
+    Queue<DelayedAction> pendingActions;
+
 public:
     explicit DialogueGraph(Player& player);
     ~DialogueGraph();
@@ -65,6 +78,10 @@ public:
     bool loadAdditionalFile(const string& filename);
     NTree<Dialogue, MAX_CHOICES>* buildTree();
     NTree<Dialogue, MAX_CHOICES>* getNode(const string& nodeId);
+
+    // Queue data structure methods: Delayed action system
+    void queueAction(const Action& action, float delaySeconds);
+    void update(float deltaTime); // Process delayed actions
 
 private:
     bool loadFile(const string& filename, bool isFirstFile);

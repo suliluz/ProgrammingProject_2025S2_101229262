@@ -5,6 +5,7 @@
 #include "dialogue/Dialogue.h"
 #include "dialogue/DialogueGraph.h"
 #include "NTree.h"
+#include "Stack.h" // Stack data structure for dialogue history
 #include <SFML/Graphics.hpp>
 #include <string>
 
@@ -25,20 +26,27 @@ public:
 private:
     void drawUIButtons();
     bool isMouseOverButton(const sf::RectangleShape& button, const sf::Vector2i& mousePos);
+    void navigateToNode(const string& nodeId); // Navigate and track history
+    void undoLastChoice(); // Go back to previous dialogue node
 
     DialogueVisitor dialogueVisitor;
     NTree<Dialogue, MAX_CHOICES>* currentDialogueNode;
     string currentNodeId;
+
+    // Stack data structure: Dialogue history for undo functionality
+    Stack<string> dialogueHistory;
 
     // UI elements
     sf::Font uiFont;
     sf::RectangleShape saveButton;
     sf::RectangleShape loadButton;
     sf::RectangleShape exitButton;
+    sf::RectangleShape backButton; // Back button for undo
     sf::Text saveButtonText;
     sf::Text loadButtonText;
     sf::Text exitButtonText;
+    sf::Text backButtonText;
 
     bool showMenu;
-    int hoveredButton; // -1 = none, 0 = save, 1 = load, 2 = exit
+    int hoveredButton; // -1 = none, 0 = save, 1 = load, 2 = exit, 3 = back
 };

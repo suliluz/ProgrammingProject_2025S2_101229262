@@ -3,7 +3,9 @@
 #include <iostream>
 #include "Visitor.h"
 #include "dialogue/Dialogue.h"
+#include "SinglyLinkedList.h" // SinglyLinkedList for conversation history
 #include <SFML/Graphics.hpp>
+#include <ctime>
 
 using namespace std;
 
@@ -11,6 +13,17 @@ class Player; // Forward declaration
 
 class DialogueVisitor : public Visitor {
 public:
+    // SinglyLinkedList data structure: Entry for conversation history log
+    struct DialogueEntry {
+        string speaker;
+        string message;
+        time_t timestamp;
+
+        DialogueEntry() : timestamp(0) {}
+        DialogueEntry(const string& spk, const string& msg)
+            : speaker(spk), message(msg), timestamp(time(nullptr)) {}
+    };
+
     explicit DialogueVisitor(sf::RenderWindow& window);
     ~DialogueVisitor() override;
 
@@ -27,6 +40,7 @@ public:
     void setTextSpeed(float speed); // Speed multiplier (1.0 = normal, 2.0 = 2x faster, etc.)
     void skipToEnd(); // Fast-forward to show full text immediately
     void toggleInventoryView() { showInventory = !showInventory; }
+    void toggleHistoryView() { showHistory = !showHistory; } // Toggle conversation history
 
 private:
     void nextCharacter();
@@ -34,6 +48,7 @@ private:
     void clearChoices();
     void drawStatsPanel();
     void drawInventoryPanel();
+    void drawHistoryPanel(); // SinglyLinkedList: Draw conversation history
     string wrapText(const string& text, float maxWidth);
 
     sf::RenderWindow& window;
@@ -52,4 +67,8 @@ private:
     Dialogue* currentDialogue;
     Player* player;
     bool showInventory;
+    bool showHistory; // Toggle for history view
+
+    // SinglyLinkedList data structure: Stores all dialogue history
+    SinglyLinkedList<DialogueEntry> conversationLog;
 };

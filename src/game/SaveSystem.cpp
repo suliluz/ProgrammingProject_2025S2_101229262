@@ -27,8 +27,28 @@ bool SaveSystem::saveGame(const Player& player, const string& currentNodeId, con
     writeInt(file, stats.getLevel());
     writeInt(file, stats.getExperience());
 
+    // Save inventory
     const auto& inventory = player.getInventory();
     writeInt(file, inventory.getGold());
+
+    // Save all inventory items using iterator
+    writeInt(file, inventory.getItemCount());
+    auto& items = const_cast<Player&>(player).getInventory().getItems();
+    auto itemIt = items.getIterator();
+    auto itemEnd = itemIt.end();
+    while (itemIt != itemEnd) {
+        const Item& item = itemIt.getCurrent()->getValue();
+        writeString(file, item.name);
+        writeString(file, item.description);
+        writeInt(file, static_cast<int>(item.type));
+        writeInt(file, item.value);
+        writeInt(file, item.weight);
+        writeInt(file, item.healthRestore);
+        writeInt(file, item.manaRestore);
+        writeInt(file, item.attackBonus);
+        writeInt(file, item.defenseBonus);
+        ++itemIt;
+    }
 
     writeString(file, currentNodeId);
 
@@ -70,8 +90,25 @@ bool SaveSystem::loadGame(Player& player, string& currentNodeId, const string& f
     player.getStats().setLevel(level);
     player.getStats().setExperience(exp);
 
+    // Load inventory
     int gold = readInt(file);
     player.getInventory().setGold(gold);
+
+    // Load inventory items and add to player's inventory
+    int itemCount = readInt(file);
+    for (int i = 0; i < itemCount; ++i) {
+        Item item;
+        item.name = readString(file);
+        item.description = readString(file);
+        item.type = static_cast<ItemType>(readInt(file));
+        item.value = readInt(file);
+        item.weight = readInt(file);
+        item.healthRestore = readInt(file);
+        item.manaRestore = readInt(file);
+        item.attackBonus = readInt(file);
+        item.defenseBonus = readInt(file);
+        player.getInventory().addItem(item); // Add to inventory list
+    }
 
     currentNodeId = readString(file);
 
