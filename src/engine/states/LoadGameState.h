@@ -30,6 +30,7 @@ private:
 
     int selectedSlot;
     bool fromMainMenu;  // Track if we came from main menu or in-game
+    // Fixed array of 3 SaveInfo slots
     SaveSlotInfo slots[SaveSystem::MAX_SAVE_SLOTS];
 };
 

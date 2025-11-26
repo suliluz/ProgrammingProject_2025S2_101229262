@@ -45,7 +45,7 @@ private:
     Stack<string> dialogueHistory;
 
     // SFML: UI components
-    sf::Font uiFont;
+    sf::Font font;
     sf::RectangleShape saveButton;
     sf::RectangleShape loadButton;
     sf::RectangleShape exitButton;

@@ -22,14 +22,14 @@ InGameState::InGameState(GameEngine& game)
       hoveredButton(-1) {
     cout << "InGameState constructor start" << endl;
 
-    if (!uiFont.openFromFile("assets/arial.ttf")) {
+    if (!font.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading UI font" << endl;
     }
 
-    saveButtonText = new sf::Text(uiFont);
-    loadButtonText = new sf::Text(uiFont);
-    exitButtonText = new sf::Text(uiFont);
-    backButtonText = new sf::Text(uiFont);
+    saveButtonText = new sf::Text(font);
+    loadButtonText = new sf::Text(font);
+    exitButtonText = new sf::Text(font);
+    backButtonText = new sf::Text(font);
 
     sf::Vector2u windowSize = game.getWindow().getSize();
     float buttonWidth = 80.0f;
@@ -117,14 +117,14 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
       showMenu(false),
       hoveredButton(-1) {
 
-    if (!uiFont.openFromFile("assets/arial.ttf")) {
+    if (!font.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading UI font" << endl;
     }
 
-    saveButtonText = new sf::Text(uiFont);
-    loadButtonText = new sf::Text(uiFont);
-    exitButtonText = new sf::Text(uiFont);
-    backButtonText = new sf::Text(uiFont);
+    saveButtonText = new sf::Text(font);
+    loadButtonText = new sf::Text(font);
+    exitButtonText = new sf::Text(font);
+    backButtonText = new sf::Text(font);
 
     sf::Vector2u windowSize = game.getWindow().getSize();
     float buttonWidth = 80.0f;
