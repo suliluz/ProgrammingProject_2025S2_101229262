@@ -1,6 +1,6 @@
-#include "DialogueVisitor.h"
+#include "DialogueRenderVisitor.h"
 #include <iostream>
-#include <algorithm> // For min() and max() functions
+#include <algorithm>
 #include "game/Player.h"
 
 // Helper to convert std::string (UTF-8) to sf::String
@@ -8,11 +8,10 @@ sf::String to_sf_string(const std::string& s) {
     return sf::String::fromUtf8(s.begin(), s.end());
 }
 
-DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
+DialogueRenderVisitor::DialogueRenderVisitor(sf::RenderWindow& win)
     : window(win), baseCharacterInterval(sf::seconds(0.05f)), characterInterval(sf::seconds(0.05f)),
       dialogueActive(false), selectedChoice(0), currentDialogue(nullptr), player(nullptr),
-      showInventory(false), showHistory(false) { // Initialize showHistory flag
-    cout << "DialogueVisitor constructor start" << endl;
+      showInventory(false), showHistory(false) {
     if (!font.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading font" << endl;
     }
@@ -21,47 +20,42 @@ DialogueVisitor::DialogueVisitor(sf::RenderWindow& win)
     text = new sf::Text(font);
     text->setCharacterSize(24);
     text->setFillColor(sf::Color::White);
-    text->setPosition({70, 380});  // Moved to make room for speaker name
+    text->setPosition({70, 380});
 
     // Speaker name text
     speakerText = new sf::Text(font);
     speakerText->setCharacterSize(28);
-    speakerText->setFillColor(sf::Color(255, 215, 0));  // Gold color for speaker
+    speakerText->setFillColor(sf::Color(255, 215, 0));
     speakerText->setStyle(sf::Text::Bold);
     speakerText->setPosition({70, 345});
-
-    cout << "DialogueVisitor constructor end" << endl;
 }
 
-DialogueVisitor::~DialogueVisitor() {
+DialogueRenderVisitor::~DialogueRenderVisitor() {
     delete text;
     delete speakerText;
     clearChoices();
 }
 
-void DialogueVisitor::visit(Dialogue& dialogue) {
-    cout << "DialogueVisitor visit start" << endl;
+// Visitor pattern: Visit Dialogue element to prepare rendering
+void DialogueRenderVisitor::visit(Dialogue& dialogue) {
     clearChoices();
     dialogueActive = true;
     currentDialogue = &dialogue;
     currentSpeaker = to_sf_string(dialogue.speaker);
 
-    // Log this dialogue to conversation history
-    conversationLog.push(DialogueEntry(dialogue.speaker, dialogue.message));
-    cout << "Logged dialogue to history (total entries: " << conversationLog.length() << ")" << endl;
-
     // Update speaker name
     speakerText->setString(currentSpeaker);
 
-    // Wrap text to fit within window (responsive width)
+    // Wrap text to fit within window
     sf::Vector2u windowSize = window.getSize();
-    float maxTextWidth = static_cast<float>(windowSize.x) - 100.0f; // Leave margins
+    float maxTextWidth = static_cast<float>(windowSize.x) - 100.0f;
     fullMessage = to_sf_string(wrapText(dialogue.message, maxTextWidth));
     currentMessage.clear();
     text->setString(currentMessage);
     elapsedTime = sf::Time::Zero;
     selectedChoice = 0;
 
+    // Prepare choice text objects for rendering
     auto it = dialogue.choices.getIterator();
     auto endIt = it.end();
     while(it != endIt) {
@@ -69,22 +63,22 @@ void DialogueVisitor::visit(Dialogue& dialogue) {
         choiceText->setCharacterSize(20);
         choiceText->setFillColor(sf::Color::White);
         choiceText->setString(to_sf_string(it.getCurrent()->getValue().text));
-        // Position will be set in render() based on window size
         choiceTexts.push(choiceText);
         ++it;
     }
-    cout << "DialogueVisitor visit end" << endl;
 }
 
-void DialogueVisitor::visit(Choice& choice) {
+// Visitor pattern: Visit Choice element (executes the choice action)
+void DialogueRenderVisitor::visit(Choice& choice) {
     if (choice.action) {
         choice.action();
     }
 }
 
-void DialogueVisitor::update(sf::Time deltaTime) {
+void DialogueRenderVisitor::update(sf::Time deltaTime) {
     if (!dialogueActive) return;
 
+    // Animate text reveal
     if (currentMessage.getSize() < fullMessage.getSize()) {
         elapsedTime += deltaTime;
         while (elapsedTime >= characterInterval) {
@@ -93,12 +87,13 @@ void DialogueVisitor::update(sf::Time deltaTime) {
         }
     }
 
+    // Highlight selected choice
     for (int i = 0; i < choiceTexts.length(); ++i) {
         choiceTexts[i]->setFillColor(i == selectedChoice ? sf::Color::Yellow : sf::Color::White);
     }
 }
 
-void DialogueVisitor::render() {
+void DialogueRenderVisitor::render() {
     if (!dialogueActive) return;
 
     // Draw player stats panel first
@@ -115,21 +110,21 @@ void DialogueVisitor::render() {
     float boxHeight = 230.0f;
     float boxY = windowHeight - boxHeight - boxMargin;
 
-    // Draw speaker name above dialogue box (left side) if there's a speaker
+    // Draw speaker name above dialogue box
     if (!currentSpeaker.isEmpty()) {
         speakerText->setPosition({boxMargin + 10, boxY - 40});
         window.draw(*speakerText);
     }
 
-    // Draw dialogue background box at bottom
+    // Draw dialogue background box
     sf::RectangleShape dialogueBox({boxWidth, boxHeight});
     dialogueBox.setPosition({boxMargin, boxY});
-    dialogueBox.setFillColor(sf::Color(0, 0, 0, 220));  // Semi-transparent black
-    dialogueBox.setOutlineColor(sf::Color(100, 150, 200, 200));  // Nice blue outline
+    dialogueBox.setFillColor(sf::Color(0, 0, 0, 220));
+    dialogueBox.setOutlineColor(sf::Color(100, 150, 200, 200));
     dialogueBox.setOutlineThickness(3);
     window.draw(dialogueBox);
 
-    // Update text position
+    // Update and draw text
     text->setPosition({boxMargin + 30.0f, boxY + 20});
     window.draw(*text);
 
@@ -143,9 +138,9 @@ void DialogueVisitor::render() {
         window.draw(fastForwardHint);
     }
 
+    // Draw choices or continue hint
     if (currentMessage.getSize() == fullMessage.getSize()) {
         if (choiceTexts.isEmpty()) {
-            // No choices - show "Press Enter to continue" hint
             sf::Text continueHint(font);
             continueHint.setCharacterSize(18);
             continueHint.setFillColor(sf::Color(220, 220, 220));
@@ -154,8 +149,8 @@ void DialogueVisitor::render() {
             continueHint.setPosition({hintX, boxY + boxHeight - 35});
             window.draw(continueHint);
         } else {
-            // Draw choices on the right side, above the dialogue box
-            float choiceWidth = min(windowWidth * 0.40f, 450.0f); // 40% of window or max 450px
+            // Draw choices on the right side
+            float choiceWidth = min(windowWidth * 0.40f, 450.0f);
             float choiceX = windowWidth - boxMargin - choiceWidth;
 
             int numChoices = choiceTexts.length();
@@ -213,6 +208,7 @@ void DialogueVisitor::render() {
         }
     }
 
+    // Draw optional panels
     if (showInventory) {
         drawInventoryPanel();
     }
@@ -222,7 +218,7 @@ void DialogueVisitor::render() {
     }
 }
 
-void DialogueVisitor::handleInput(const sf::Event& event) {
+void DialogueRenderVisitor::handleInput(const sf::Event& event) {
     if (!dialogueActive) return;
 
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>()) {
@@ -260,26 +256,26 @@ void DialogueVisitor::handleInput(const sf::Event& event) {
     }
 }
 
-void DialogueVisitor::nextCharacter() {
+void DialogueRenderVisitor::nextCharacter() {
     if (currentMessage.getSize() < fullMessage.getSize()) {
         currentMessage += static_cast<char32_t>(fullMessage[currentMessage.getSize()]);
         text->setString(currentMessage);
     }
 }
 
-void DialogueVisitor::selectChoice(int index) {
+void DialogueRenderVisitor::selectChoice(int index) {
     if (currentDialogue && index < currentDialogue->choices.length()) {
         currentDialogue->choices.get(index)->getValue().accept(*this);
     }
 }
 
-void DialogueVisitor::clearChoices() {
+void DialogueRenderVisitor::clearChoices() {
     while (!choiceTexts.isEmpty()) {
         delete choiceTexts.pop();
     }
 }
 
-std::string DialogueVisitor::wrapText(const std::string& text, float maxWidth) {
+std::string DialogueRenderVisitor::wrapText(const std::string& text, float maxWidth) {
     sf::String sfText = to_sf_string(text);
     std::string result;
     sf::String currentLine;
@@ -337,10 +333,8 @@ std::string DialogueVisitor::wrapText(const std::string& text, float maxWidth) {
     return result;
 }
 
-void DialogueVisitor::drawStatsPanel() {
+void DialogueRenderVisitor::drawStatsPanel() {
     if (!player) return;
-
-    sf::Vector2u windowSize = window.getSize();
 
     float panelX = 10.0f;
     float panelY = 10.0f;
@@ -442,7 +436,7 @@ void DialogueVisitor::drawStatsPanel() {
     window.draw(inventoryText);
 }
 
-void DialogueVisitor::drawInventoryPanel() {
+void DialogueRenderVisitor::drawInventoryPanel() {
     if (!player) return;
 
     sf::Vector2u windowSize = window.getSize();
@@ -545,18 +539,9 @@ void DialogueVisitor::drawInventoryPanel() {
     window.draw(weightInfo);
 }
 
-void DialogueVisitor::skipToEnd() {
-    currentMessage = fullMessage;
-    text->setString(currentMessage);
-}
-
-void DialogueVisitor::setTextSpeed(float speed) {
-    characterInterval = sf::seconds(baseCharacterInterval.asSeconds() / speed);
-}
-
-void DialogueVisitor::drawHistoryPanel() {
-    if (!player) return;
-
+void DialogueRenderVisitor::drawHistoryPanel() {
+    // Note: History data is now managed by DialogueLogVisitor
+    // This method just renders the UI. The actual log reference will be passed via DialogueUI
     sf::Vector2u windowSize = window.getSize();
     float windowWidth = static_cast<float>(windowSize.x);
     float windowHeight = static_cast<float>(windowSize.y);
@@ -581,57 +566,19 @@ void DialogueVisitor::drawHistoryPanel() {
     historyTitle.setPosition({panelX + 15.0f, panelY + 10.0f});
     window.draw(historyTitle);
 
-    float currentY = panelY + 45.0f;
-    float lineHeight = 18.0f;
-    int maxEntriesVisible = static_cast<int>((panelHeight - 60.0f) / (lineHeight * 3));
+    sf::Text emptyText(font);
+    emptyText.setCharacterSize(14);
+    emptyText.setFillColor(sf::Color(150, 150, 150));
+    emptyText.setString("History managed by DialogueLogVisitor");
+    emptyText.setPosition({panelX + 20.0f, panelY + 100.0f});
+    window.draw(emptyText);
+}
 
-    if (conversationLog.length() == 0) {
-        sf::Text emptyText(font);
-        emptyText.setCharacterSize(14);
-        emptyText.setFillColor(sf::Color(150, 150, 150));
-        emptyText.setString("No conversation history yet");
-        emptyText.setPosition({panelX + 20.0f, currentY + 100.0f});
-        window.draw(emptyText);
-    } else {
-        auto it = conversationLog.getIterator();
-        int entriesDrawn = 0;
+void DialogueRenderVisitor::skipToEnd() {
+    currentMessage = fullMessage;
+    text->setString(currentMessage);
+}
 
-        while (it != conversationLog.getIterator().end() && entriesDrawn < maxEntriesVisible) {
-            const DialogueEntry& entry = it.getCurrent()->getValue();
-
-            sf::Text speakerLabel(font);
-            speakerLabel.setCharacterSize(14);
-            speakerLabel.setFillColor(sf::Color(255, 200, 100));
-            speakerLabel.setStyle(sf::Text::Bold);
-            speakerLabel.setString(to_sf_string(entry.speaker.empty() ? "..." : entry.speaker));
-            speakerLabel.setPosition({panelX + 15.0f, currentY});
-            window.draw(speakerLabel);
-
-            currentY += lineHeight;
-
-            string wrappedMessage = wrapText(entry.message, panelWidth - 30.0f);
-            sf::Text messageText(font);
-            messageText.setCharacterSize(12);
-            messageText.setFillColor(sf::Color(220, 220, 220));
-            messageText.setString(to_sf_string(wrappedMessage));
-            messageText.setPosition({panelX + 20.0f, currentY});
-            window.draw(messageText);
-
-            int numLines = 1;
-            for (char c : wrappedMessage) {
-                if (c == '\n') numLines++;
-            }
-            currentY += lineHeight * numLines + 10.0f;
-
-            entriesDrawn++;
-            ++it;
-        }
-    }
-
-    sf::Text footerText(font);
-    footerText.setCharacterSize(11);
-    footerText.setFillColor(sf::Color(180, 180, 180));
-    footerText.setString("Total entries: " + to_string(conversationLog.length()));
-    footerText.setPosition({panelX + 15.0f, panelY + panelHeight - 25.0f});
-    window.draw(footerText);
+void DialogueRenderVisitor::setTextSpeed(float speed) {
+    characterInterval = sf::seconds(baseCharacterInterval.asSeconds() / speed);
 }

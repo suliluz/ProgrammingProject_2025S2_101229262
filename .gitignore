@@ -79,3 +79,4 @@ CTestTestfile.cmake
 docs/_build/
 html/
 latex/
+*.md

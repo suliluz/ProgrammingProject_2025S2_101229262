@@ -42,10 +42,14 @@ include_directories(
 )
 
 # List all source files for compilation
+# Multiple Visitor pattern implementations (RenderVisitor, LogVisitor, DebugVisitor)
 set(GAME_SOURCES
     main.cpp
     src/engine/GameEngine.cpp
-    src/engine/DialogueVisitor.cpp
+    src/engine/DialogueRenderVisitor.cpp
+    src/engine/DialogueLogVisitor.cpp
+    src/engine/DialogueDebugVisitor.cpp
+    src/engine/DialogueUI.cpp
     src/dialogue/Dialogue.cpp
     src/dialogue/DialogueGraph.cpp
     src/dialogue/Choice.cpp

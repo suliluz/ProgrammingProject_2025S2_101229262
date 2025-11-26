@@ -16,21 +16,21 @@
 
 using namespace std;
 
+// Action types that can be triggered by dialogue choices
+struct Action {
+    enum Type { GOLD, ITEM, XP, HEALTH, MANA, END_DIALOGUE } type;
+    string stringParam;
+    int intParam;
+
+    Action();
+    Action(Type t, int val);
+    Action(Type t, string str, int val = 0);
+};
+
 // DialogueGraph: Manages the entire dialogue tree and choice actions
 // Uses multiple data structures: HashTable, List, Queue, NTree
 class DialogueGraph {
 public:
-    // Action types that can be triggered by dialogue choices
-    struct Action {
-        enum Type { GOLD, ITEM, XP, HEALTH, MANA, END_DIALOGUE } type;
-        string stringParam;
-        int intParam;
-
-        Action();
-        Action(Type t, int val);
-        Action(Type t, string str, int val = 0);
-    };
-
     // Queue data structure: Delayed actions (timed execution)
     struct DelayedAction {
         Action action;

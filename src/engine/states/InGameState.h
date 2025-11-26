@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameState.h"
-#include "engine/DialogueVisitor.h"
+#include "engine/DialogueUI.h"
 #include "dialogue/Dialogue.h"
 #include "dialogue/DialogueGraph.h"
 #include "NTree.h"  // N-ary tree for dialogue branching
@@ -12,6 +12,7 @@
 using namespace std;
 
 // In-game state: Main gameplay with dialogue system
+// Uses DialogueUI which coordinates multiple visitors (Render, Log, Debug)
 class InGameState : public GameState {
 public:
     explicit InGameState(GameEngine& game);
@@ -34,8 +35,8 @@ private:
     void navigateToNode(const string& nodeId);  // Navigate and push to history stack
     void undoLastChoice();  // Pop from stack and return to previous node
 
-    // Handles dialogue rendering
-    DialogueVisitor dialogueVisitor;
+    // Coordinates multiple visitors for dialogue operations
+    DialogueUI dialogueUI;
 
     // NTree data structure: Current node in dialogue tree
     NTree<Dialogue, MAX_CHOICES>* currentDialogueNode;

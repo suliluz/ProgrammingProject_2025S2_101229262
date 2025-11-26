@@ -15,7 +15,7 @@ sf::String to_sf_string_ingame(const std::string& s) {
 
 InGameState::InGameState(GameEngine& game)
     : GameState(game),
-      dialogueVisitor(game.getWindow()),
+      dialogueUI(game.getWindow()),
       currentDialogueNode(nullptr),
       currentNodeId("root"),
       showMenu(false),
@@ -89,7 +89,8 @@ InGameState::InGameState(GameEngine& game)
         dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node) {
             if (node && !node->isEmpty()) {
                 currentDialogueNode = node;
-                currentDialogueNode->getKey().accept(dialogueVisitor);
+                // Visitor pattern: Apply multiple visitors to dialogue
+                dialogueUI.displayDialogue(currentDialogueNode->getKey());
             } else {
                 currentDialogueNode = nullptr;
             }
@@ -100,7 +101,8 @@ InGameState::InGameState(GameEngine& game)
             game.getPlayer().displayStatus();
             if (rootNode && !rootNode->isEmpty()) {
                 currentDialogueNode = rootNode;
-                currentDialogueNode->getKey().accept(dialogueVisitor);
+                // Visitor pattern: Apply multiple visitors to dialogue
+                dialogueUI.displayDialogue(currentDialogueNode->getKey());
             } else {
                 currentDialogueNode = nullptr;
             }
@@ -111,7 +113,7 @@ InGameState::InGameState(GameEngine& game)
 
 InGameState::InGameState(GameEngine& game, const string& startNodeId)
     : GameState(game),
-      dialogueVisitor(game.getWindow()),
+      dialogueUI(game.getWindow()),
       currentDialogueNode(nullptr),
       currentNodeId(startNodeId),
       showMenu(false),
@@ -172,15 +174,16 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
     exitButtonText->setFillColor(sf::Color::White);
     exitButtonText->setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
 
-    dialogueVisitor.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
-    dialogueVisitor.setPlayer(&game.getPlayer());
+    dialogueUI.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
+    dialogueUI.setPlayer(&game.getPlayer());
 
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
         dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node) {
             if (node && !node->isEmpty()) {
                 currentDialogueNode = node;
-                currentDialogueNode->getKey().accept(dialogueVisitor);
+                // Visitor pattern: Apply multiple visitors to dialogue
+                dialogueUI.displayDialogue(currentDialogueNode->getKey());
             }
         });
 
@@ -189,12 +192,14 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
             game.getPlayer().displayStatus();
             if (startNodeId == "root") {
                 currentDialogueNode = rootNode;
-                currentDialogueNode->getKey().accept(dialogueVisitor);
+                // Visitor pattern: Apply multiple visitors to dialogue
+                dialogueUI.displayDialogue(currentDialogueNode->getKey());
             } else {
                 auto* loadNode = dialogueGraph->getNode(startNodeId);
                 if (loadNode && !loadNode->isEmpty()) {
                     currentDialogueNode = loadNode;
-                    currentDialogueNode->getKey().accept(dialogueVisitor);
+                    // Visitor pattern: Apply multiple visitors to dialogue
+                    dialogueUI.displayDialogue(currentDialogueNode->getKey());
                 }
             }
         }
@@ -239,8 +244,8 @@ void InGameState::handleInput() {
             }
         }
 
-        if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
-            dialogueVisitor.handleInput(*event);
+        if (currentDialogueNode && dialogueUI.isDialogueActive()) {
+            dialogueUI.handleInput(*event);
         }
     }
 }
@@ -259,8 +264,8 @@ void InGameState::update(float dt) {
         hoveredButton = 2;
     }
 
-    if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
-        dialogueVisitor.update(sf::seconds(dt));
+    if (currentDialogueNode && dialogueUI.isDialogueActive()) {
+        dialogueUI.update(dt);
     }
 
     auto* dialogueGraph = game.getDialogueGraph();
@@ -270,8 +275,8 @@ void InGameState::update(float dt) {
 }
 
 void InGameState::render(sf::RenderWindow& window) {
-    if (currentDialogueNode && dialogueVisitor.isDialogueActive()) {
-        dialogueVisitor.render();
+    if (currentDialogueNode && dialogueUI.isDialogueActive()) {
+        dialogueUI.render();
     }
 
     drawUIButtons();
@@ -331,7 +336,8 @@ void InGameState::navigateToNode(const string& nodeId) {
         auto* node = dialogueGraph->getNode(nodeId);
         if (node && !node->isEmpty()) {
             currentDialogueNode = node;
-            currentDialogueNode->getKey().accept(dialogueVisitor);
+            // Visitor pattern: Apply multiple visitors to dialogue
+            dialogueUI.displayDialogue(currentDialogueNode->getKey());
         }
     }
 }
@@ -346,7 +352,8 @@ void InGameState::undoLastChoice() {
             auto* node = dialogueGraph->getNode(previousNodeId);
             if (node && !node->isEmpty()) {
                 currentDialogueNode = node;
-                currentDialogueNode->getKey().accept(dialogueVisitor);
+                // Visitor pattern: Apply multiple visitors to dialogue
+                dialogueUI.displayDialogue(currentDialogueNode->getKey());
             }
         }
     }

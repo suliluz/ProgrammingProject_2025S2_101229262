@@ -7,8 +7,6 @@
 template <class T>
 class List;
 
-#include "List.h"
-
 template <class K, class V>
 class HashTable {
 private:
