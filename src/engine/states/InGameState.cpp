@@ -81,8 +81,8 @@ InGameState::InGameState(GameEngine& game)
     exitButtonText->setFillColor(sf::Color::White);
     exitButtonText->setPosition({exitButton.getPosition().x + 23, exitButton.getPosition().y + 7});
 
-    dialogueVisitor.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
-    dialogueVisitor.setPlayer(&game.getPlayer());
+    dialogueUI.setTextSpeed(game.getSettings().getTextSpeedMultiplier());
+    dialogueUI.setPlayer(&game.getPlayer());
 
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
