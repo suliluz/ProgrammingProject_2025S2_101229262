@@ -16,9 +16,11 @@
 
 using namespace std;
 
+enum Type { GOLD, ITEM, XP, HEALTH, MANA, END_DIALOGUE };
+
 // Action types that can be triggered by dialogue choices
 struct Action {
-    enum Type { GOLD, ITEM, XP, HEALTH, MANA, END_DIALOGUE } type;
+    Type type;
     string stringParam;
     int intParam;
 

@@ -11,9 +11,7 @@ using namespace std;
 class Player; // Forward declaration
 
 // DialogueRenderVisitor: Visitor pattern implementation for rendering dialogue UI
-// Responsibility: ONLY handles visual presentation of dialogue and choices
-// This visitor demonstrates the Visitor pattern by separating rendering logic
-// from the dialogue data structure (Dialogue/Choice classes)
+// ONLY handles visual presentation of dialogue and choices
 class DialogueRenderVisitor : public Visitor {
 public:
     explicit DialogueRenderVisitor(sf::RenderWindow& window);

@@ -7,11 +7,7 @@
 using namespace std;
 
 // DialogueDebugVisitor: Visitor pattern implementation for debugging dialogue structure
-// Responsibility: ONLY outputs debug information about dialogue tree structure
-// Demonstrates the Visitor pattern's extensibility:
-//   - This visitor was added WITHOUT modifying Dialogue or Choice classes
-//   - Shows how new operations can be added to existing structures
-//   - Useful for development, testing, and validation
+// ONLY outputs debug information about dialogue tree structure
 class DialogueDebugVisitor : public Visitor {
 public:
     explicit DialogueDebugVisitor(bool verbose = true);

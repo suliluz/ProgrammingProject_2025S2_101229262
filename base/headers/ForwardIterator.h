@@ -7,7 +7,6 @@ using namespace std;
 template <class T>
 class ForwardIterator {
     typedef SinglyLinkedNode<T> Node;
-
 private:
     Node* current;
 

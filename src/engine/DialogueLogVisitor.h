@@ -20,9 +20,7 @@ struct DialogueEntry {
 };
 
 // DialogueLogVisitor: Visitor pattern implementation for logging conversation history
-// Responsibility: ONLY tracks and stores dialogue entries in chronological order
-// Demonstrates Visitor pattern by separating data collection from dialogue structure
-// This is a lightweight visitor focused on a single operation: logging
+// ONLY tracks and stores dialogue entries in chronological order
 class DialogueLogVisitor : public Visitor {
 public:
     DialogueLogVisitor();

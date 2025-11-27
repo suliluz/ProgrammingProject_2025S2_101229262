@@ -74,7 +74,7 @@ public:
     }
 
     // Push, aka append to tail
-    Node* push(const T value) {
+    void push(const T value) {
         // Create a node
         Node* node = new Node(value);
 
@@ -89,7 +89,6 @@ public:
         }
 
         ++count;
-        return node;
     }
 
     // Push front, append as head
