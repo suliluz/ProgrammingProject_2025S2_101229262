@@ -92,6 +92,7 @@ bool SaveSystem::loadGame(Player& player, string& currentNodeId, const string& f
 
     // Load inventory
     int gold = readInt(file);
+    player.getInventory().clear(); // Clear existing items before loading
     player.getInventory().setGold(gold);
 
     // Load inventory items and add to player's inventory

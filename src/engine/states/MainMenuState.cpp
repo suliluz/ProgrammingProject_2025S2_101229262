@@ -62,6 +62,7 @@ void MainMenuState::handleInput() {
                 // Execute selected menu option
                 switch (selectedItemIndex) {
                     case 0:  // New Game
+                        game.getPlayer().reset();
                         game.changeState(make_unique<InGameState>(game));
                         break;
                     case 1:  // Load Game

@@ -146,4 +146,13 @@ public:
 
         inventory.displayInventory();
     }
+
+    // Reset player to initial state for new game
+    void reset() {
+        stats = PlayerStats(stats.getName());
+        inventory = Inventory(100);
+        inventory.addGold(0);
+        equippedWeapon = nullptr;
+        equippedArmor = nullptr;
+    }
 };

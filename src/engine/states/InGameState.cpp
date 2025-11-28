@@ -86,8 +86,15 @@ InGameState::InGameState(GameEngine& game)
 
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
-        dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node) {
+        dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node, const string& nodeId) {
             if (node && !node->isEmpty()) {
+                // Save current node to history before navigating
+                if (!currentNodeId.empty()) {
+                    dialogueHistory.push(currentNodeId);
+                }
+
+                // Update current node and its ID
+                currentNodeId = nodeId;
                 currentDialogueNode = node;
                 // Visitor pattern: Apply multiple visitors to dialogue
                 dialogueUI.displayDialogue(currentDialogueNode->getKey());
@@ -179,8 +186,15 @@ InGameState::InGameState(GameEngine& game, const string& startNodeId)
 
     auto* dialogueGraph = game.getDialogueGraph();
     if (dialogueGraph) {
-        dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node) {
+        dialogueGraph->setDialogueStartCallback([this](NTree<Dialogue, MAX_CHOICES>* node, const string& nodeId) {
             if (node && !node->isEmpty()) {
+                // Save current node to history before navigating
+                if (!currentNodeId.empty()) {
+                    dialogueHistory.push(currentNodeId);
+                }
+
+                // Update current node and its ID
+                currentNodeId = nodeId;
                 currentDialogueNode = node;
                 // Visitor pattern: Apply multiple visitors to dialogue
                 dialogueUI.displayDialogue(currentDialogueNode->getKey());

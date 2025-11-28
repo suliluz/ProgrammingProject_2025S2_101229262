@@ -51,7 +51,7 @@ DialogueGraph::~DialogueGraph() {
     fileNodeData.clear();
 }
 
-void DialogueGraph::setDialogueStartCallback(function<void(NTree<Dialogue, MAX_CHOICES>*)> callback) {
+void DialogueGraph::setDialogueStartCallback(function<void(NTree<Dialogue, MAX_CHOICES>*, const string&)> callback) {
     onDialogueStart = std::move(callback);
 }
 
@@ -250,7 +250,7 @@ function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree
 
         // Navigate to target node in dialogue tree
         if (targetNode && onDialogueStart) {
-            onDialogueStart(targetNode);
+            onDialogueStart(targetNode, choiceInfo.targetNodeId);
         }
     };
 }

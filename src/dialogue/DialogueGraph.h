@@ -67,7 +67,7 @@ private:
 
     string rootNodeId;
     Player* playerRef;
-    function<void(NTree<Dialogue, MAX_CHOICES>*)> onDialogueStart;
+    function<void(NTree<Dialogue, MAX_CHOICES>*, const string&)> onDialogueStart;
     NTree<Dialogue, MAX_CHOICES>* rootTree;
 
     // Queue data structure: Pending delayed actions (FIFO)
@@ -77,7 +77,7 @@ public:
     explicit DialogueGraph(Player& player);
     ~DialogueGraph();
 
-    void setDialogueStartCallback(function<void(NTree<Dialogue, MAX_CHOICES>*)> callback);
+    void setDialogueStartCallback(function<void(NTree<Dialogue, MAX_CHOICES>*, const string&)> callback);
     bool loadFromFile(const string& filename);
     bool loadAdditionalFile(const string& filename);
 

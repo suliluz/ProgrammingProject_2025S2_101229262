@@ -137,4 +137,10 @@ public:
     List<Item>& getItems() {
         return items;
     }
+
+    // Clear all items from inventory
+    void clear() {
+        items.clear();
+        currentWeight = 0;
+    }
 };
