@@ -11,7 +11,7 @@ using namespace std;
 class Choice : public Element {
 public:
     string text;  // Display text for the choice
-    function<void()> action;  // Lambda function executed when choice is selected
+    function<void()> action;  // function executed when choice is selected
 
     // Accept visitor for processing
     void accept(Visitor& visitor) override;

@@ -3,8 +3,8 @@
 #include <algorithm>
 #include "game/Player.h"
 
-// Helper to convert std::string (UTF-8) to sf::String
-sf::String to_sf_string(const std::string& s) {
+// Helper to convert string (UTF-8) to sf::String
+sf::String to_sf_string(const string& s) {
     return sf::String::fromUtf8(s.begin(), s.end());
 }
 
@@ -275,16 +275,16 @@ void DialogueRenderVisitor::clearChoices() {
     }
 }
 
-std::string DialogueRenderVisitor::wrapText(const std::string& text, float maxWidth) {
+string DialogueRenderVisitor::wrapText(const string& text, float maxWidth) {
     sf::String sfText = to_sf_string(text);
-    std::string result;
+    string result;
     sf::String currentLine;
     sf::String word;
 
     sf::Text tempText(font);
     tempText.setCharacterSize(24);
 
-    for (std::size_t idx = 0; idx < sfText.getSize(); ++idx) {
+    for (size_t idx = 0; idx < sfText.getSize(); ++idx) {
         char32_t c = sfText[idx];
         if (c == ' ' || c == '\n') {
             sf::String testLine = currentLine;

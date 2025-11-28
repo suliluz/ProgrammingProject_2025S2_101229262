@@ -29,39 +29,38 @@ struct Action {
     Action(Type t, string str, int val = 0);
 };
 
+// Queue data structure: Delayed actions (timed execution)
+struct DelayedAction {
+    Action action;
+    float delaySeconds;
+
+    DelayedAction() : delaySeconds(0.0f) {}
+    DelayedAction(const Action& act, float delay) : action(act), delaySeconds(delay) {}
+};
+
+// Choice metadata parsed from script file
+struct ChoiceInfo {
+    string text;
+    string targetNodeId;  // Next dialogue node to navigate to
+    List<Action> actions;  // List data structure: Actions to execute
+    List<string> condition;  // List data structure: Conditions to check (e.g., "gold>=30")
+
+    ChoiceInfo();
+};
+
+// Dialogue node metadata parsed from script file
+struct NodeInfo {
+    string nodeId;
+    string speaker;
+    string message;
+    List<ChoiceInfo> choices;  // List data structure: Available choices
+
+    NodeInfo();
+};
+
 // DialogueGraph: Manages the entire dialogue tree and choice actions
 // Uses multiple data structures: HashTable, List, Queue, NTree
 class DialogueGraph {
-public:
-    // Queue data structure: Delayed actions (timed execution)
-    struct DelayedAction {
-        Action action;
-        float delaySeconds;
-
-        DelayedAction() : delaySeconds(0.0f) {}
-        DelayedAction(const Action& act, float delay) : action(act), delaySeconds(delay) {}
-    };
-
-    // Choice metadata parsed from script file
-    struct ChoiceInfo {
-        string text;
-        string targetNodeId;  // Next dialogue node to navigate to
-        List<Action> actions;  // List data structure: Actions to execute
-        List<string> condition;  // List data structure: Conditions to check (e.g., "gold>=30")
-
-        ChoiceInfo();
-    };
-
-    // Dialogue node metadata parsed from script file
-    struct NodeInfo {
-        string nodeId;
-        string speaker;
-        string message;
-        List<ChoiceInfo> choices;  // List data structure: Available choices
-
-        NodeInfo();
-    };
-
 private:
     // HashTable data structure: Nested hash tables for file->node mapping
     // Outer: filename -> inner hash table

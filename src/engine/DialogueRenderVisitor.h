@@ -47,7 +47,7 @@ private:
     void drawStatsPanel();
     void drawInventoryPanel();
     void drawHistoryPanel();
-    std::string wrapText(const std::string& text, float maxWidth);
+    string wrapText(const string& text, float maxWidth);
 
     // SFML rendering state
     sf::RenderWindow& window;
