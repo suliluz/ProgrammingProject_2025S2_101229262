@@ -6,6 +6,9 @@ using namespace std;
 DialogueUI::DialogueUI(sf::RenderWindow& window)
     : renderVisitor(window), debugVisitor(false), window(window), debugMode(false) {
     cout << "DialogueUI initialized with multiple visitors (Render, Log, Debug)" << endl;
+
+    // Connect the log visitor to the render visitor for history display
+    renderVisitor.setLogVisitor(&logVisitor);
 }
 
 // Demonstrates proper Visitor pattern usage:

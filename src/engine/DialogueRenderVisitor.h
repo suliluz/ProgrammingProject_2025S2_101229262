@@ -7,6 +7,9 @@
 #include <string>
 #include "game/Player.h"
 
+// Forward declaration to avoid circular dependency
+class DialogueLogVisitor;
+
 using namespace std;
 
 class DialogueRenderVisitor : public Visitor {
@@ -31,6 +34,7 @@ private:
     Player* player;
     bool showInventory;
     bool showHistory;
+    DialogueLogVisitor* logVisitor;
 
 public:
     explicit DialogueRenderVisitor(sf::RenderWindow& window);
@@ -57,6 +61,9 @@ public:
 
     // Player reference for stats/inventory display
     void setPlayer(Player* player) { this->player = player; }
+
+    // Log visitor reference for history display
+    void setLogVisitor(DialogueLogVisitor* logVisitor) { this->logVisitor = logVisitor; }
 
 private:
     // Helper methods for rendering different UI components

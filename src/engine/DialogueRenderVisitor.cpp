@@ -1,7 +1,9 @@
 #include "DialogueRenderVisitor.h"
+#include "DialogueLogVisitor.h"
 #include <iostream>
 #include <algorithm>
 #include "game/Player.h"
+#include <ctime>
 
 // Helper to convert string (UTF-8) to sf::String
 sf::String to_sf_string(const string& s) {
@@ -11,7 +13,7 @@ sf::String to_sf_string(const string& s) {
 DialogueRenderVisitor::DialogueRenderVisitor(sf::RenderWindow& win)
     : window(win), baseCharacterInterval(sf::seconds(0.05f)), characterInterval(sf::seconds(0.05f)),
       dialogueActive(false), selectedChoice(0), currentDialogue(nullptr), player(nullptr),
-      showInventory(false), showHistory(false) {
+      showInventory(false), showHistory(false), logVisitor(nullptr) {
     if (!font.openFromFile("assets/arial.ttf")) {
         cerr << "Error loading font" << endl;
     }
@@ -540,8 +542,11 @@ void DialogueRenderVisitor::drawInventoryPanel() {
 }
 
 void DialogueRenderVisitor::drawHistoryPanel() {
-    // Note: History data is now managed by DialogueLogVisitor
-    // This method just renders the UI. The actual log reference will be passed via DialogueUI
+    // Check if we have access to the log visitor
+    if (!logVisitor) {
+        return; // No log visitor available, cannot display history
+    }
+
     sf::Vector2u windowSize = window.getSize();
     float windowWidth = static_cast<float>(windowSize.x);
     float windowHeight = static_cast<float>(windowSize.y);
@@ -566,12 +571,78 @@ void DialogueRenderVisitor::drawHistoryPanel() {
     historyTitle.setPosition({panelX + 15.0f, panelY + 10.0f});
     window.draw(historyTitle);
 
-    sf::Text emptyText(font);
-    emptyText.setCharacterSize(14);
-    emptyText.setFillColor(sf::Color(150, 150, 150));
-    emptyText.setString("History managed by DialogueLogVisitor");
-    emptyText.setPosition({panelX + 20.0f, panelY + 100.0f});
-    window.draw(emptyText);
+    // Get the conversation log from the log visitor
+    const SinglyLinkedList<DialogueEntry>& conversationLog = logVisitor->getConversationLog();
+
+    float currentY = panelY + 45.0f;
+    float lineHeight = 18.0f;
+    float maxContentHeight = panelHeight - 60.0f;
+
+    // Check if log is empty
+    if (conversationLog.isEmpty()) {
+        sf::Text emptyText(font);
+        emptyText.setCharacterSize(14);
+        emptyText.setFillColor(sf::Color(150, 150, 150));
+        emptyText.setString("No conversation history yet");
+        emptyText.setPosition({panelX + 20.0f, currentY + 50.0f});
+        window.draw(emptyText);
+        return;
+    }
+
+    // Iterate through the conversation log and render each entry
+    auto it = const_cast<SinglyLinkedList<DialogueEntry>&>(conversationLog).getIterator();
+    auto endIt = it.end();
+    int entryCount = 0;
+    int maxEntries = static_cast<int>(maxContentHeight / (lineHeight * 3.5f)); // Each entry takes ~3-4 lines
+
+    while (it != endIt && entryCount < maxEntries) {
+        const DialogueEntry& entry = it.getCurrent()->getValue();
+
+        // Draw speaker name
+        sf::Text speakerNameText(font);
+        speakerNameText.setCharacterSize(14);
+        speakerNameText.setFillColor(sf::Color(255, 215, 0));
+        speakerNameText.setStyle(sf::Text::Bold);
+        speakerNameText.setString(to_sf_string(entry.speaker + ":"));
+        speakerNameText.setPosition({panelX + 15.0f, currentY});
+        window.draw(speakerNameText);
+        currentY += lineHeight;
+
+        // Draw message (wrapped if necessary)
+        string wrappedMessage = wrapText(entry.message, panelWidth - 40.0f);
+        sf::Text messageText(font);
+        messageText.setCharacterSize(13);
+        messageText.setFillColor(sf::Color(220, 220, 220));
+        messageText.setString(to_sf_string(wrappedMessage));
+        messageText.setPosition({panelX + 15.0f, currentY});
+        window.draw(messageText);
+
+        // Calculate how many lines this message takes
+        int numLines = 1;
+        for (char c : wrappedMessage) {
+            if (c == '\n') numLines++;
+        }
+        currentY += lineHeight * numLines + 10.0f; // Add spacing between entries
+
+        // Check if we're running out of space
+        if (currentY + lineHeight * 4 > panelY + panelHeight - 10.0f) {
+            break; // Stop rendering to avoid overflow
+        }
+
+        ++it;
+        entryCount++;
+    }
+
+    // Show indicator if there are more entries
+    int totalEntries = conversationLog.length();
+    if (entryCount < totalEntries) {
+        sf::Text moreText(font);
+        moreText.setCharacterSize(12);
+        moreText.setFillColor(sf::Color(150, 150, 150));
+        moreText.setString("... and " + to_string(totalEntries - entryCount) + " more entries");
+        moreText.setPosition({panelX + 15.0f, panelY + panelHeight - 30.0f});
+        window.draw(moreText);
+    }
 }
 
 void DialogueRenderVisitor::skipToEnd() {
