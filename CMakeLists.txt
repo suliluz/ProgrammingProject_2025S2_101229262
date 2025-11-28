@@ -58,7 +58,6 @@ set(GAME_SOURCES
     src/engine/states/LoadGameState.cpp
     src/engine/states/SettingsState.cpp
     src/game/SaveSystem.cpp
-    src/engine/DialogueManager.cpp
 )
 
 # Create the executable from source files
