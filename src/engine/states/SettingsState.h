@@ -15,6 +15,13 @@ enum class SettingOption {
 };
 
 class SettingsState : public GameState {
+private:
+    sf::Font font;
+    sf::Text* title;
+    List<sf::Text*> optionLabels;
+    List<sf::Text*> optionValues;
+    int selectedOptionIndex;
+
 public:
     explicit SettingsState(GameEngine& game);
     ~SettingsState() override;
@@ -24,12 +31,6 @@ public:
     void render(sf::RenderWindow& window) override;
 
 private:
-    sf::Font font;
-    sf::Text* title;
-    List<sf::Text*> optionLabels;
-    List<sf::Text*> optionValues;
-    int selectedOptionIndex;
-
     void moveUp();
     void moveDown();
     void changeLeft();

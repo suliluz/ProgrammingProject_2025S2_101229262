@@ -8,6 +8,17 @@
 using namespace std;
 
 class LoadGameState : public GameState {
+private:
+    sf::Font font;
+    sf::Text* title;
+    List<sf::Text*> slotTexts;
+    List<sf::RectangleShape*> slotBoxes;
+
+    int selectedSlot;
+    bool fromMainMenu;
+    // Fixed array of 3 SaveInfo slots
+    SaveSlotInfo slots[SaveSystem::MAX_SAVE_SLOTS];
+
 public:
     explicit LoadGameState(GameEngine& game, bool fromMainMenu = false);
     ~LoadGameState();
@@ -22,16 +33,4 @@ private:
     void selectSlot();
     void goBack();
     void updateSlotDisplay();
-
-    sf::Font font;
-    sf::Text* title;
-    List<sf::Text*> slotTexts;
-    List<sf::RectangleShape*> slotBoxes;
-
-    int selectedSlot;
-    bool fromMainMenu;  // Track if we came from main menu or in-game
-    // Fixed array of 3 SaveInfo slots
-    SaveSlotInfo slots[SaveSystem::MAX_SAVE_SLOTS];
 };
-
-

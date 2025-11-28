@@ -1,15 +1,13 @@
 #pragma once
-#include "List.h"  // Custom List data structure
+#include "List.h"
 #include "Item.h"
 #include <iostream>
 
 using namespace std;
 
-// Inventory class: Manages player's items and gold
-// List data structure: Stores items
 class Inventory {
 private:
-    List<Item> items;  // List data structure: Dynamic item storage
+    List<Item> items;
     int maxWeight;
     int currentWeight;
     int gold;
@@ -45,7 +43,7 @@ public:
             cout << "Inventory full! Cannot carry " << item.name << endl;
             return false;
         }
-        items.push(item);  // Add to List
+        items.push(item);
         currentWeight += item.weight;
         cout << "Added " << item.name << " to inventory." << endl;
         return true;

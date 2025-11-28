@@ -5,21 +5,18 @@
 #include "DialogueDebugVisitor.h"
 #include "dialogue/Dialogue.h"
 #include <SFML/Graphics.hpp>
+#include "game/Player.h"
 
-class Player; // Forward declaration
-
-// DialogueUI: Coordinator/Facade for multiple dialogue visitors
-// This class demonstrates proper use of the Visitor pattern by:
-//   1. Managing MULTIPLE visitors, each with a single responsibility
-//   2. Applying visitors to dialogue elements to perform different operations
-//   3. Showing how operations can be separated from the dialogue structure
-//
-// Note: This is NOT a Visitor itself - it's a controller that uses visitors.
-// This separation shows understanding that:
-//   - Visitors perform operations
-//   - Controllers coordinate operations
-//   - These are different concerns
 class DialogueUI {
+private:
+    // Multiple visitors - each with a single responsibility
+    DialogueRenderVisitor renderVisitor;
+    DialogueLogVisitor logVisitor;
+    DialogueDebugVisitor debugVisitor;
+
+    sf::RenderWindow& window;
+    bool debugMode;
+
 public:
     explicit DialogueUI(sf::RenderWindow& window);
     ~DialogueUI() = default;
@@ -45,13 +42,4 @@ public:
 
     // Access to conversation log (managed by DialogueLogVisitor)
     const SinglyLinkedList<DialogueEntry>& getConversationLog() const;
-
-private:
-    // Multiple visitors - each with a single responsibility
-    DialogueRenderVisitor renderVisitor;     // Handles rendering
-    DialogueLogVisitor logVisitor;           // Tracks conversation history
-    DialogueDebugVisitor debugVisitor;       // Debug output (optional)
-
-    sf::RenderWindow& window;
-    bool debugMode;
 };

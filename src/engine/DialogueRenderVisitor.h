@@ -5,14 +5,33 @@
 #include "List.h"
 #include <SFML/Graphics.hpp>
 #include <string>
+#include "game/Player.h"
 
 using namespace std;
 
-class Player; // Forward declaration
-
-// DialogueRenderVisitor: Visitor pattern implementation for rendering dialogue UI
-// ONLY handles visual presentation of dialogue and choices
 class DialogueRenderVisitor : public Visitor {
+private:
+    // SFML rendering state
+    sf::RenderWindow& window;
+    sf::Font font;
+    sf::Text* text;
+    sf::Text* speakerText;
+    sf::String currentSpeaker;
+    sf::String fullMessage;
+    sf::String currentMessage;
+    sf::Time characterInterval;
+    sf::Time baseCharacterInterval;
+    sf::Time elapsedTime;
+
+    // UI state
+    bool dialogueActive;
+    List<sf::Text*> choiceTexts;
+    int selectedChoice;
+    Dialogue* currentDialogue;
+    Player* player;
+    bool showInventory;
+    bool showHistory;
+
 public:
     explicit DialogueRenderVisitor(sf::RenderWindow& window);
     ~DialogueRenderVisitor() override;
@@ -48,25 +67,4 @@ private:
     void drawInventoryPanel();
     void drawHistoryPanel();
     string wrapText(const string& text, float maxWidth);
-
-    // SFML rendering state
-    sf::RenderWindow& window;
-    sf::Font font;
-    sf::Text* text;
-    sf::Text* speakerText;
-    sf::String currentSpeaker;
-    sf::String fullMessage;
-    sf::String currentMessage;
-    sf::Time characterInterval;
-    sf::Time baseCharacterInterval;
-    sf::Time elapsedTime;
-
-    // UI state
-    bool dialogueActive;
-    List<sf::Text*> choiceTexts;
-    int selectedChoice;
-    Dialogue* currentDialogue;
-    Player* player;
-    bool showInventory;
-    bool showHistory;
 };

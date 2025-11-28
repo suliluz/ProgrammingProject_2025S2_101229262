@@ -6,9 +6,12 @@
 
 using namespace std;
 
-// DialogueDebugVisitor: Visitor pattern implementation for debugging dialogue structure
-// ONLY outputs debug information about dialogue tree structure
 class DialogueDebugVisitor : public Visitor {
+private:
+    bool verbose;
+    int dialogueCount;
+    int choiceCount;
+
 public:
     explicit DialogueDebugVisitor(bool verbose = true);
     ~DialogueDebugVisitor() override = default;
@@ -21,9 +24,4 @@ public:
     int getDialogueCount() const { return dialogueCount; }
     int getChoiceCount() const { return choiceCount; }
     void resetStats();
-
-private:
-    bool verbose;
-    int dialogueCount;
-    int choiceCount;
 };

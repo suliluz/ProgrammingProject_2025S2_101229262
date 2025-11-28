@@ -1,11 +1,8 @@
 #pragma once
 #include "HashEntry.h"      // Our new entry class
 #include "Hasher.h"         // Our new hasher
+#include "List.h"           // List data structure
 #include <cstddef>          // For size_t
-
-// Forward declare List to avoid circular dependency
-template <class T>
-class List;
 
 template <class K, class V>
 class HashTable {
@@ -54,7 +51,8 @@ public:
         }
 
         currentSize++;
-        return &(bucket.push(Entry(key, value))->getValue().value);
+        bucket.push(Entry(key, value));
+        return &(bucket.getLast().value);
     }
 
     bool get(const K& key, V& value) {

@@ -8,7 +8,6 @@
 
 using namespace std;
 
-// SinglyLinkedList data structure: Entry for conversation history log
 struct DialogueEntry {
     string speaker;
     string message;
@@ -19,9 +18,11 @@ struct DialogueEntry {
         : speaker(spk), message(msg), timestamp(time(nullptr)) {}
 };
 
-// DialogueLogVisitor: Visitor pattern implementation for logging conversation history
-// ONLY tracks and stores dialogue entries in chronological order
 class DialogueLogVisitor : public Visitor {
+private:
+    // SinglyLinkedList data structure: Stores all dialogue history
+    SinglyLinkedList<DialogueEntry> conversationLog;
+
 public:
     DialogueLogVisitor();
     ~DialogueLogVisitor() override = default;
@@ -37,8 +38,4 @@ public:
     // Query operations
     int getLogSize() const { return conversationLog.length(); }
     void clearLog() { conversationLog.clear(); }
-
-private:
-    // SinglyLinkedList data structure: Stores all dialogue history
-    SinglyLinkedList<DialogueEntry> conversationLog;
 };

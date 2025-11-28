@@ -3,7 +3,6 @@
 
 using namespace std;
 
-// Item types for categorization and behavior
 enum class ItemType {
     WEAPON,
     ARMOR,
@@ -13,7 +12,6 @@ enum class ItemType {
     MISC
 };
 
-// Item class: Represents items in player inventory
 class Item {
 public:
     string name;

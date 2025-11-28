@@ -7,17 +7,7 @@
 using namespace std;
 
 class DialogueManager {
-public:
-    DialogueManager();
-    void startDialogue(const Dialogue& dialogue);
-    void update(sf::Time deltaTime);
-    void render(sf::RenderWindow& window);
-    void handleInput(const sf::Event& event);
-
 private:
-    void nextCharacter();
-    void selectChoice(int index);
-
     sf::Font font;
     sf::Text* text;
     string fullMessage;
@@ -28,4 +18,15 @@ private:
     List<sf::Text*> choiceTexts;
     int selectedChoice;
     const Dialogue* currentDialogue;
+
+public:
+    DialogueManager();
+    void startDialogue(const Dialogue& dialogue);
+    void update(sf::Time deltaTime);
+    void render(sf::RenderWindow& window);
+    void handleInput(const sf::Event& event);
+
+private:
+    void nextCharacter();
+    void selectChoice(int index);
 };

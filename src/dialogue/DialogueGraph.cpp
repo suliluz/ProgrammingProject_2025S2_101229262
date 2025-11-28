@@ -13,10 +13,10 @@ Action::Action(Type t, int val) : type(t), intParam(val) {}
 Action::Action(Type t, string str, int val)
     : type(t), stringParam(std::move(str)), intParam(val) {}
 
-DialogueGraph::ChoiceInfo::ChoiceInfo() : actions(), condition(List<string>{})
+ChoiceInfo::ChoiceInfo() : actions(), condition(List<string>{})
 {}
 
-DialogueGraph::NodeInfo::NodeInfo() = default;
+NodeInfo::NodeInfo() = default;
 
 DialogueGraph::DialogueGraph(Player& player) : rootNodeId("root"), playerRef(&player), rootTree(nullptr) {}
 
@@ -257,7 +257,7 @@ function<void()> DialogueGraph::createAction(const ChoiceInfo& choiceInfo, NTree
 
 void DialogueGraph::executeAction(const Action& action) {
     switch (action.type) {
-        case Action::GOLD:
+        case GOLD:
             if (action.intParam > 0) {
                 playerRef->getInventory().addGold(action.intParam);
             } else {
@@ -265,18 +265,18 @@ void DialogueGraph::executeAction(const Action& action) {
             }
             break;
 
-        case Action::ITEM: {
+        case ITEM: {
             Item item = createItemFromString(action.stringParam);
             item.value = action.intParam;
             playerRef->pickupItem(item);
             break;
         }
 
-        case Action::XP:
+        case XP:
             playerRef->getStats().gainExperience(action.intParam);
             break;
 
-        case Action::HEALTH:
+        case HEALTH:
             if (action.intParam > 0) {
                 playerRef->getStats().heal(action.intParam);
             } else {
@@ -284,11 +284,11 @@ void DialogueGraph::executeAction(const Action& action) {
             }
             break;
 
-        case Action::MANA:
+        case MANA:
             playerRef->getStats().restoreMana(action.intParam);
             break;
 
-        case Action::END_DIALOGUE:
+        case END_DIALOGUE:
             // Handle dialogue end
             break;
     }
@@ -375,7 +375,7 @@ ItemType DialogueGraph::stringToItemType(const string& typeStr) {
     return ItemType::MISC;
 }
 
-DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
+ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
     ChoiceInfo info;
 
     // Split choice line by '|' delimiter
@@ -397,23 +397,23 @@ DialogueGraph::ChoiceInfo DialogueGraph::parseChoice(const string& choiceLine) {
         }
         else if (part.rfind("gold:", 0) == 0) {
             int amount = stoi(part.substr(5));
-            info.actions.push(Action(Action::GOLD, amount)); // Add action to list
+            info.actions.push(Action(GOLD, amount)); // Add action to list
         }
         else if (part.rfind("item:", 0) == 0) {
             string itemStr = part.substr(5);
-            info.actions.push(Action(Action::ITEM, itemStr, 0)); // Add action to list
+            info.actions.push(Action(ITEM, itemStr, 0)); // Add action to list
         }
         else if (part.rfind("xp:", 0) == 0) {
             int amount = stoi(part.substr(3));
-            info.actions.push(Action(Action::XP, amount)); // Add action to list
+            info.actions.push(Action(XP, amount)); // Add action to list
         }
         else if (part.rfind("health:", 0) == 0) {
             int amount = stoi(part.substr(7));
-            info.actions.push(Action(Action::HEALTH, amount)); // Add action to list
+            info.actions.push(Action(HEALTH, amount)); // Add action to list
         }
         else if (part.rfind("mana:", 0) == 0) {
             int amount = stoi(part.substr(5));
-            info.actions.push(Action(Action::MANA, amount)); // Add action to list
+            info.actions.push(Action(MANA, amount)); // Add action to list
         }
         else if (part.rfind("condition:", 0) == 0) {
             info.condition.push(trim(part.substr(10))); // Add condition to list
